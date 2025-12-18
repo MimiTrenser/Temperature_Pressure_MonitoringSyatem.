@@ -60,7 +60,7 @@ void* PollingThread(void *arg)
         {
             PollingConfig_t *config = &polling_table[i];
 
-            /*............................Poll Once.......................................*/
+            /*................................Poll Once.......................................*/
             if((now - config->lastpoll_time) >= config->PollInterval_ms)
             {
                 if(config->PollInterval_ms == 0)
@@ -85,7 +85,7 @@ void* PollingThread(void *arg)
                     continue;
                 }
 
-            /*............................Periodic Poll.......................................*/
+            /*..................................Periodic Poll.......................................*/
                 else
                 {
                     SensorResult Result;
