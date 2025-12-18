@@ -48,7 +48,7 @@ PollingConfig_t polling_table[] = {{PARAM_TEMP,50,PARAM_TYPE_INT,.read_fn.readIn
                                     {PARAM_CONFIG_VERSION,0,PARAM_TYPE_STRING,.read_fn.readstr_fn = readConfigVersion,0,0}};
 
 #define SizeofPollTable (sizeof(polling_table)/sizeof(PollingConfig_t))
-
+/*......................................Polling Thread................................................................*/
 void* PollingThread(void *arg)
 {
     (void)arg;
@@ -60,7 +60,7 @@ void* PollingThread(void *arg)
         {
             PollingConfig_t *config = &polling_table[i];
 
-            /*................................Poll Once.......................................*/
+            /*....................................Poll Once.......................................*/
             if((now - config->lastpoll_time) >= config->PollInterval_ms)
             {
                 if(config->PollInterval_ms == 0)
