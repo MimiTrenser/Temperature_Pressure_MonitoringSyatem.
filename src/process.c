@@ -24,11 +24,14 @@ static void processPressureAction(int32_t value)
     printf("Pressure: %d\n", value);
 }
 
+/*.............................Process parse table.........................................................*/
 
 ProcessConfig_t process_table[] = {{PARAM_TEMP,200,-10,70,400,0,0},
                                     {PARAM_PRESSURE,400,500,6000,800,0,0}};
 
 #define SizeofProcessTable (sizeof(process_table)/sizeof(ProcessConfig_t))
+
+/*......................................Precess Thread.....................................................*/
 
 void* ProcessingThread(void *arg)
 {

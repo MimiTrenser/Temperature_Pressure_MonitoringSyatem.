@@ -5,12 +5,12 @@
 #include <time.h>
 #include <pthread.h>
 
-
+/*.............................Reads Temperature........................................................*/
 static int32_t readTemperature(int8_t *out)
 {
     static int32_t Temp; 
-    Temp = (-20 + rand() % 141);
-    if(Temp < -20 || Temp > 100)
+    Temp = (-20 + rand() % 141);            /*Genereate random values from 0 to 120*/
+    if(Temp < -20 || Temp > 100)            /*To check temp values are out of bound*/
     {
         *out = 1;
     }
@@ -20,12 +20,12 @@ static int32_t readTemperature(int8_t *out)
     }
     return Temp; 
 }
-
+/*............................Reads Pressure...............................................................*/
 static int32_t readPressure(int8_t *out)
 {
     static int32_t Pressure;
-    Pressure = (rand() % 11001);
-    if(Pressure < 0 || Pressure > 10000)
+    Pressure = (rand() % 11001);            /*Generate Random values from 0 to 11000*/
+    if(Pressure < 0 || Pressure > 10000)    /*To check pressure values are out of bound*/
     {
         *out = 1;
     }
@@ -36,19 +36,22 @@ static int32_t readPressure(int8_t *out)
     return Pressure;
 }
 
+/*..........................Reads Config version...........................................................*/
 static void readConfigVersion(char *buf)
 {
     strcpy(buf,"1234");
     buf[4] = '\0';
     printf("Config Ver : %s\n",buf);
 }
-
+/*.............................Polling parse table.........................................................*/
 PollingConfig_t polling_table[] = {{PARAM_TEMP,50,PARAM_TYPE_INT,.read_fn.readInt_fn = readTemperature,0,0},
                                     {PARAM_PRESSURE,200,PARAM_TYPE_INT,.read_fn.readInt_fn = readPressure,0,0},
                                     {PARAM_CONFIG_VERSION,0,PARAM_TYPE_STRING,.read_fn.readstr_fn = readConfigVersion,0,0}};
 
 #define SizeofPollTable (sizeof(polling_table)/sizeof(PollingConfig_t))
-/*......................................Polling Thread................................................................*/
+
+/*......................................Polling Thread.............................................*/
+
 void* PollingThread(void *arg)
 {
     (void)arg;
@@ -61,6 +64,7 @@ void* PollingThread(void *arg)
             PollingConfig_t *config = &polling_table[i];
 
             /*....................................Poll Once.......................................*/
+
             if((now - config->lastpoll_time) >= config->PollInterval_ms)
             {
                 if(config->PollInterval_ms == 0)
@@ -86,6 +90,7 @@ void* PollingThread(void *arg)
                 }
 
             /*..................................Periodic Poll.......................................*/
+
                 else
                 {
                     SensorResult Result;
@@ -100,7 +105,7 @@ void* PollingThread(void *arg)
                 } 
             }
         }
-        usleep(10000);//10ms
+        usleep(10000);/* 10ms */
     }
     return NULL;
 }
