@@ -1,10 +1,19 @@
+//**************************** PROJECT X ************************************** 
+//  Copyright (c) 2021 Trenser 
+//  All Rights Reserved 
+//***************************************************************************** 
+// 
+// File   : FileName.cpp 
+// Summary : Main.c file includes thread creation for polling and process
+// Note    : 
+// Author  : Mimi C.S
+// Date    : 19/12/2025
+// 
+//***************************************************************************** 
 #include <pthread.h>
 #include<stdio.h>
-//#include<stdlib.h>
-#include<sensor.h>
+#include<database.h>
 #include<unistd.h>
-
-
 
 int main(void)
 {
