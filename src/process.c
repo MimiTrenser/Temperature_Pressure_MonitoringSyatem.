@@ -71,9 +71,9 @@ void* ProcessingThread(void *arg)
 
     while (1)
     {
-        int64_t llCurrentTime = GetTimeMs();
         for (int i = 0; i < (int)PROCESS_TABLE_SIZE; i++)
         {
+            int64_t llCurrentTime = GetTimeMs();
             SensorResult ProcessSensorData;
             Read_Data_Status_t eDataStatus;
             ProcessConfig_t *Configuration = &gProcessTable[i];
@@ -91,11 +91,11 @@ void* ProcessingThread(void *arg)
                 }
                 else
                 {
-                    if(Configuration->m_eParam == PARAM_TEMP)
+                    if(ProcessSensorData.m_eParam == PARAM_TEMP)
                     {
                         ProcessTemperatureAction(ProcessSensorData.m_Value.lIntValue);
                     }
-                    if(Configuration->m_eParam == PARAM_PRESSURE)
+                    if(ProcessSensorData.m_eParam == PARAM_PRESSURE)
                     {
                         ProcessPressureAction(ProcessSensorData.m_Value.lIntValue);
                     }
@@ -104,11 +104,11 @@ void* ProcessingThread(void *arg)
                 }
                 if(Configuration->m_ulViolationTime >= Configuration->m_ulSamplingTime)/*If violation time exceeds sampling time Notification sent*/
                 {
-                    if(Configuration->m_eParam == PARAM_TEMP)
+                    if(ProcessSensorData.m_eParam == PARAM_TEMP)
                     {
                         SendNotificationTemperature(ProcessSensorData.m_Value.lIntValue);
                     }
-                    if(Configuration->m_eParam == PARAM_PRESSURE)
+                    if(ProcessSensorData.m_eParam == PARAM_PRESSURE)
                     {
                         SendNotificationPressure(ProcessSensorData.m_Value.lIntValue);
                     }

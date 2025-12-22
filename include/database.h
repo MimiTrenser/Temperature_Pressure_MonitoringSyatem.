@@ -38,45 +38,51 @@ typedef enum
 {
     PARAM_TYPE_INT,
     PARAM_TYPE_STRING
-}paramType_t;
+}ParamType_t;
 
-/*..............Structure For Polling Configuration.................................*/
+//********************************.Polling Configuration.******************************* 
+//.Description   : Includes polling Configuration parameters
+//************************************************************************************** 
 typedef struct
 {
-    ParamId_t m_eParam;                        /*Parameters for Polling*/
-    uint64_t m_ullPollIntervalMs;           /*Polling Interval in ms*/
-    paramType_t m_eType;                       /*Prameter Type -> Int or String*/
+    ParamId_t m_eParam;                           /*Parameters for Polling*/
+    uint64_t m_ullPollIntervalMs;                 /*Polling Interval in ms*/
+    ParamType_t m_eType;                          /*Prameter Type -> Int or String*/
     union 
     {
         int32_t (*pfnReadInt)(bool *ucReadStatus); /*Read Temp and Read Pressure*///uint8_t *cReadStatus
-        void (*pfnReadstr)(char *buf);      /*Read Config Version*/
+        void (*pfnReadstr)(char *buf);             /*Read Config Version*/
     }m_ReadFn;
-    uint64_t m_ullLastPollTime;                 /*Last poll time*/
-    uint8_t m_ulPolledOnce;                    /*Config verion need to be polled once*/
+    uint64_t m_ullLastPollTime;                    /*Last poll time*/
+    uint8_t m_ulPolledOnce;                        /*Config verion need to be polled once*/
 } PollingConfig_t;
 
-/*..............Structure For Process Configuration.................................*/
+//********************************.Process Configuration.******************************* 
+//.Description   : Includes Process Configuration parameters
+//************************************************************************************** 
 typedef struct
 {
-    ParamId_t m_eParam;                        /*Parametrs for Processing*/
-    uint64_t m_ullProcessIntervalMs;            /*Process interval in ms*/
-    int32_t m_lMiniThreshold;                 /*Mini Threshold value*/
-    int64_t m_llMaxThreshold;                  /*Max Threshold Value*/
-    uint32_t m_ulSamplingTime;                  /*Sampling Time(After sampling time violation notification should sent)*/
-    uint32_t m_ulViolationTime;                 /*In every violation increment by process time*/
-    uint64_t m_ullLastProcessTime;               /*Last proccess time */
+    ParamId_t m_eParam;              /*Parametrs for Processing*/
+    uint64_t m_ullProcessIntervalMs; /*Process interval in ms*/
+    int32_t m_lMiniThreshold;        /*Mini Threshold value*/
+    int64_t m_llMaxThreshold;        /*Max Threshold Value*/
+    uint32_t m_ulSamplingTime;       /*Sampling Time(After sampling time violation notification should sent)*/
+    uint32_t m_ulViolationTime;      /*In every violation increment by process time*/
+    uint64_t m_ullLastProcessTime;   /*Last proccess time */
 }ProcessConfig_t;
 
-/*..............Structure For storing polled Results .................................*/
+//********************************.Sensor Result.******************************* 
+//.Description   : Includes members which stores polled results and used for processing
+//************************************************************************************** 
 typedef struct
 {
-    paramType_t m_eType;
-    ParamId_t m_eParam;                       /*Parameter Type -> Int or String*/
+    ParamType_t m_eType;
+    ParamId_t m_eParam;              /*Parameter Type -> Int or String*/
     union 
     {
         int32_t lIntValue;
         char StringValue[STR_LEN+1];
-    }m_Value;                               /* Union for storing polled values*/
+    }m_Value;                        /* Union for storing polled values*/
 }SensorResult;
 
 long long GetTimeMs();

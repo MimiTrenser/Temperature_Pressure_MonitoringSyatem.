@@ -79,7 +79,7 @@ Read_Data_Status_t SetPolledValue(ParamId_t eId,const SensorResult *pcSetSensorD
 }
 
 //******************************.GetPolledValue.************************************ 
-//Purpose : 
+//Purpose : Getting polled values.
 //Inputs  : eId - The unique identifier for the parameter to be updated.
 //          pGetSensorData - Pointer to which Sensordata is updated.  
 //Notes   :  Requires g_mtxDataLock to be initialized before calling. 

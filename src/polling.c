@@ -31,11 +31,11 @@
 //Return : The generated temperature value (-20 to 120).
 //Notes : Simulated via rand(); depends on TemperatureLowerBound and TemperatureUpperBound 
 //********************************************************************************** 
-static int32_t sReadTemperature(bool *pReadStatus)//uint8_t *pReadStatus
+static int32_t sReadTemperature(bool *pReadStatus)
 {
     static int32_t sTemperature; 
-    sTemperature = (TemperatureLowerBound + rand() % 141);                                                /*Genereate random values from 0 to 120*/
-    if(sTemperature < TemperatureLowerBound || sTemperature > TemperatureUpperBound)    /*To check temp values are out of bound*/
+    sTemperature = (TemperatureLowerBound + rand() % 141);                           /* Genereate random values from 0 to 120 */
+    if(sTemperature < TemperatureLowerBound || sTemperature > TemperatureUpperBound) /* To check temp values are out of bound */
     {
         *pReadStatus = false;
     }
@@ -55,8 +55,8 @@ static int32_t sReadTemperature(bool *pReadStatus)//uint8_t *pReadStatus
 static int32_t sReadPressure(bool *pReadStatus)//uint8_t *pReadStatus
 {
     static int32_t sPressure;
-    sPressure = (rand() % 11001);                                      /*Generate Random values from 0 to 11000*/
-    if(sPressure < PressureLowerBound|| sPressure > PressureUpperBound)    /*To check pressure values are out of bound*/
+    sPressure = (rand() % 11001);                                        /* Generate Random values from 0 to 11000*/
+    if(sPressure < PressureLowerBound|| sPressure > PressureUpperBound) /* To check pressure values are out of bound*/
     {
         *pReadStatus = false;
     }
