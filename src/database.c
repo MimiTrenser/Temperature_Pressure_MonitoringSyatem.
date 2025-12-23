@@ -80,7 +80,7 @@ Read_Data_Status_t SetPolledValue(ParamId_t eId, const SensorResult_t *pcSetSens
 //Notes   :  Requires g_mtxDataLock to be initialized before calling. 
 //********************************************************************************** 
 
-Read_Data_Status_t GetPolledValue(ParamId_t eId,SensorResult_t *pGetSensorData)
+Read_Data_Status_t GetPolledValue(ParamId_t eId, SensorResult_t *pGetSensorData)
 {
     if(eId >= PARAM_MAX || pGetSensorData == NULL)
     {

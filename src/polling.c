@@ -156,7 +156,7 @@ void* PollingThread(void *arg)
                             printf("Invalid Data\n");
                         }
                     }
-                    eDataStatus = SetPolledValue(Configuration->m_eParam,&PolledSensorData);
+                    eDataStatus = SetPolledValue(Configuration->m_eParam, &PolledSensorData);
                     if(eDataStatus == DATA_ERROR)
                     {
                         printf("Invalid Parameter or Read error\n");
