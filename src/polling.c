@@ -95,9 +95,12 @@ void sReadConfigVersion(char *pBuffer)
     {
         printf("Failed to access Buffer\n");
     }
+    else
+    {
     strcpy(pBuffer,"1234");
     pBuffer[4] = '\0';
     printf("Configuration Version : %s\n", pBuffer);
+    }
 }
 
 //******************************.Polling Thread.********************************** 
