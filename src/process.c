@@ -85,6 +85,8 @@ void* ProcessingThread(void *arg)
                 {
                     printf("Invalid Parameter Type or Data is not present\n");
                 }
+                else
+                {
                 if(ProcessSensorData.m_Value.lIntValue < Configuration->m_lMiniThreshold || ProcessSensorData.m_Value.lIntValue > Configuration->m_llMaxThreshold)
                 {
                     Configuration->m_ulViolationTime += Configuration->m_ullProcessIntervalMs;/* Violation time increments by ProcessIntervalMs in each violation*/
@@ -95,9 +97,13 @@ void* ProcessingThread(void *arg)
                     {
                         ProcessTemperatureAction(ProcessSensorData.m_Value.lIntValue);
                     }
-                    if(ProcessSensorData.m_eParam == PARAM_PRESSURE)
+                    else if(ProcessSensorData.m_eParam == PARAM_PRESSURE)
                     {
                         ProcessPressureAction(ProcessSensorData.m_Value.lIntValue);
+                    }
+                    else
+                    {
+                        printf("Invalid Parameter Type or Data is not present\n");
                     }
                     Configuration->m_ulViolationTime = 0;
 
@@ -108,13 +114,22 @@ void* ProcessingThread(void *arg)
                     {
                         SendNotificationTemperature(ProcessSensorData.m_Value.lIntValue);
                     }
-                    if(ProcessSensorData.m_eParam == PARAM_PRESSURE)
+                    else if(ProcessSensorData.m_eParam == PARAM_PRESSURE)
                     {
                         SendNotificationPressure(ProcessSensorData.m_Value.lIntValue);
+                    }
+                    else
+                    {
+                        printf("Invalid Parameter Type or Data is not present\n");
                     }
                     Configuration->m_ulViolationTime = 0;
                 }
                 Configuration->m_ullLastProcessTime = llCurrentTime;
+            }
+            }
+            else
+            {
+                /* Nothing to do */
             }
         }
         usleep(50000);/*50Ms*/
