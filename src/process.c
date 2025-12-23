@@ -3,7 +3,7 @@
 //  All Rights Reserved 
 //********************************************************************************************************** 
 // 
-// File   : FileName.cpp 
+// File    : FileName.cpp 
 // Summary : Process.c file executes Process Thread.Process the Temperarture and
 //           pressure values as per requirement
 // Note    : 
@@ -16,34 +16,34 @@
 #include <unistd.h>
 #include <pthread.h>
 
-ProcessConfig_t gProcessTable[] = {{PARAM_TEMP,200,-10,70,400,0,0},
-                                   {PARAM_PRESSURE,400,500,6000,800,0,0}};
+ProcessConfig_t gProcessTable[] = {{PARAM_TEMP, 200, -10, 70, 400, 0, 0},
+                                   {PARAM_PRESSURE, 400, 500, 6000, 800, 0, 0}};
 
-#define PROCESS_TABLE_SIZE (sizeof(gProcessTable)/sizeof(ProcessConfig_t))
+#define PROCESS_TABLE_SIZE (sizeof(gProcessTable) / sizeof(ProcessConfig_t))
 
 //******************************.SendNotificationTemperature.************************************************
 //Purpose : Print function to indicate Temperature violated threshold value
-//Inputs :  int value - Violated Temperature Value.
-//Notes : Threshold for temperarture is -10 to 20
+//Inputs  :  int value - Violated Temperature Value.
+//Notes   : Threshold for temperarture is -10 to 20
 //***********************************************************************************************************
 static void SendNotificationTemperature(int value)
 {
-    printf("Temperature : %d -> Temperature Violated Threshold Values\n",value);
+    printf("Temperature : %d -> Temperature Violated Threshold Values\n", value);
 }
 
 //******************************.SendNotificationPressure.***************************************************
 //Purpose : Print function to indicate Pressure violated threshold value
-//Inputs :  int value - Violated Pressure Value.
-//Notes : Threshold for pressure is 400 to 6000
+//Inputs  :  int value - Violated Pressure Value.
+//Notes   : Threshold for pressure is 400 to 6000
 //***********************************************************************************************************
 static void SendNotificationPressure(int value)
 {
-    printf("Pressure : %d -> Pressure Violated Threshold Values\n",value);
+    printf("Pressure: %d -> Pressure Violated Threshold Values\n", value);
 }
 
 //******************************.ProcessTemperatureAction.***************************************************
 //Purpose : Print Temperature value
-//Inputs :  int32_t value - Temperature Value.
+//Inputs  :  int32_t value - Temperature Value.
 //***********************************************************************************************************
 static void ProcessTemperatureAction(int32_t value)
 {
@@ -53,7 +53,7 @@ static void ProcessTemperatureAction(int32_t value)
 
 //******************************.ProcessPressureAction.******************************************************
 //Purpose : Print  Pressure value
-//Inputs :  int32_t value - Pressure Value.
+//Inputs  :  int32_t value - Pressure Value.
 //***********************************************************************************************************
 static void ProcessPressureAction(int32_t value)
 {
@@ -74,13 +74,13 @@ void* ProcessingThread(void *arg)
         for (int i = 0; i < (int)PROCESS_TABLE_SIZE; i++)
         {
             int64_t llCurrentTime = GetTimeMs();
-            SensorResult ProcessSensorData;
+            SensorResult_t ProcessSensorData;
             Read_Data_Status_t eDataStatus;
             ProcessConfig_t *Configuration = &gProcessTable[i];
             ProcessSensorData.m_eParam = Configuration->m_eParam;
             if((llCurrentTime - Configuration->m_ullLastProcessTime) >= (Configuration->m_ullProcessIntervalMs))
             {
-                eDataStatus = GetPolledValue(Configuration->m_eParam,&ProcessSensorData);
+                eDataStatus = GetPolledValue(Configuration->m_eParam, &ProcessSensorData);
                 if(eDataStatus == DATA_ERROR)
                 {
                     printf("Invalid Parameter Type or Data is not present\n");

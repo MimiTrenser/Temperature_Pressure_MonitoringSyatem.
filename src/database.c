@@ -3,7 +3,7 @@
 //  All Rights Reserved 
 //********************************************************************************************************** 
 // 
-// File   : FileName.cpp 
+// File    : FileName.cpp 
 // Summary : Sensor.c file Exchanges polling data for processing .
 // Note    : 
 // Author  : Mimi C.S
@@ -14,13 +14,14 @@
 #include <pthread.h>
 #include <string.h>
 #include <time.h>
-#include<unistd.h>
+#include <unistd.h>
 #include <sys/time.h>
-#include<stdlib.h>
+#include <stdlib.h>
 
 static pthread_mutex_t gMutex = PTHREAD_MUTEX_INITIALIZER;
-int32_t *g_lTemperatureData = NULL;
-int32_t *g_lPressureData = NULL;
+static int32_t *s_plDataBase = NULL;
+static bool *s_pblValidDataBase = NULL;
+
  
 //******************************.GetTimeMs.****************************** 
 //Purpose : To get the current System Time in Ms
@@ -34,46 +35,40 @@ long long GetTimeMs()
     return milliseconds;
 }
 
- //******************************.SetPolledValue.*************************************
+//******************************.SetPolledValue.*************************************
 //Purpose : Updates the sensor data for a specific parameter ID in a Memory
 //          in a thread-safe manner.
 //Inputs  : eId - The unique identifier for the parameter to be updated.
 //          pcstSensorData - Pointer to the constant sensor data structure.
 //Notes   : Requires g_mtxDataLock to be initialized before calling.
-//********************************************************************************** 
-Read_Data_Status_t SetPolledValue(ParamId_t eId,const SensorResult *pcSetSensorData)
+//************************************************************************************ 
+Read_Data_Status_t SetPolledValue(ParamId_t eId, const SensorResult_t *pcSetSensorData)
 {
-    if(eId>=PARAM_MAX || pcSetSensorData == NULL)
+    if(eId >= PARAM_MAX || pcSetSensorData == NULL)
     {
         return DATA_ERROR;
     }
     pthread_mutex_lock(&gMutex);
-    if(pcSetSensorData->m_eParam == PARAM_TEMP)
+    if(s_plDataBase == NULL)
     {
-        if(g_lTemperatureData == NULL)
+        s_plDataBase = (int32_t*)malloc(sizeof(int32_t)*PARAM_MAX);
+        s_pblValidDataBase = (bool*)malloc(sizeof(bool)*PARAM_MAX);
+        if(s_plDataBase == NULL || s_pblValidDataBase == NULL)
         {
-            g_lTemperatureData = (int32_t*)malloc(sizeof(int32_t));
-            if(g_lTemperatureData == NULL)
-            {
-                pthread_mutex_unlock(&gMutex);
-                return DATA_ALLOCATION_FAILED;
-            }
+            free(s_plDataBase);
+            free(s_pblValidDataBase);
+            s_plDataBase = NULL;
+            s_pblValidDataBase = NULL;
+            pthread_mutex_unlock(&gMutex);
+            return DATA_ALLOCATION_FAILED;
         }
-        *g_lTemperatureData = pcSetSensorData->m_Value.lIntValue;
-    }    
-    else if(pcSetSensorData->m_eParam == PARAM_PRESSURE)
-    {
-        if(g_lPressureData == NULL)
+        for(uint8_t i = 0; i < PARAM_MAX; i++)
         {
-            g_lPressureData = (int32_t*)malloc(sizeof(int32_t));
-            if(g_lPressureData == NULL)
-            {
-                pthread_mutex_unlock(&gMutex);
-                return DATA_ALLOCATION_FAILED;
-            }
+            s_pblValidDataBase[i] = false;
         }
-        *g_lPressureData = pcSetSensorData->m_Value.lIntValue;
     }
+    s_plDataBase[eId] = pcSetSensorData->m_Value.lIntValue;
+    s_pblValidDataBase[eId] = true;
     pthread_mutex_unlock(&gMutex);
     return DATA_ALLOCATION_SUCCESS;
 }
@@ -85,33 +80,25 @@ Read_Data_Status_t SetPolledValue(ParamId_t eId,const SensorResult *pcSetSensorD
 //Notes   :  Requires g_mtxDataLock to be initialized before calling. 
 //********************************************************************************** 
 
-Read_Data_Status_t GetPolledValue(ParamId_t eId,SensorResult *pGetSensorData)
+Read_Data_Status_t GetPolledValue(ParamId_t eId,SensorResult_t *pGetSensorData)
 {
-    if(eId>=PARAM_MAX)
+    if(eId >= PARAM_MAX || pGetSensorData == NULL)
     {
         return DATA_ERROR;
     }
     pthread_mutex_lock(&gMutex);
-    if(eId == PARAM_TEMP)
+    if(s_plDataBase == NULL || s_pblValidDataBase == NULL)
     {
-        if(g_lTemperatureData == NULL)
-        {
-            pthread_mutex_unlock(&gMutex);
-            return DATA_ERROR;
-        }
-        pGetSensorData->m_Value.lIntValue = *g_lTemperatureData;
-        pGetSensorData->m_eParam = PARAM_TEMP;
+        pthread_mutex_unlock(&gMutex);
+        return DATA_ERROR;
     }
-    if(eId == PARAM_PRESSURE)
+    if(s_pblValidDataBase[eId] == false)
     {
-        if(g_lPressureData == NULL)
-        {
-            pthread_mutex_unlock(&gMutex);
-            return DATA_ERROR;
-        }
-        pGetSensorData->m_Value.lIntValue = *g_lPressureData;
-        pGetSensorData->m_eParam = PARAM_PRESSURE;
+        pthread_mutex_unlock(&gMutex);
+        return DATA_ERROR;
     }
+    pGetSensorData->m_Value.lIntValue = s_plDataBase[eId];
+    pGetSensorData->m_eParam = eId;
     pthread_mutex_unlock(&gMutex);  
     return DATA_ALLOCATION_SUCCESS;
 }

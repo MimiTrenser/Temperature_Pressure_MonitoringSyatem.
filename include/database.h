@@ -1,21 +1,20 @@
-//**************************** Temparature Pressure Monitoring System *********
+//**************************** Temparature Pressure Monitoring System ***********
 //  Copyright (c) 2021 Trenser 
 //  All Rights Reserved 
-//*****************************************************************************
+//********************************************************************************
 // 
 // Summary    : The objective is to develop a multi-threaded embedded application
 //              to monitor environmental parameters (Temperature and Pressure) and
 //              system metadata (Configuration Version). 
 // Note       : 
 // 
-//***************************************************************************** 
-
+//******************************************************************************* 
 #ifndef SENSOR_SYSTEM_H
 #define SENSOR_SYSTEM_H
 
 #include <stdint.h>
 #include <sys/time.h>
-#include<stdbool.h>
+#include <stdbool.h>
 
 #define STR_LEN 5
 
@@ -71,7 +70,7 @@ typedef struct
     uint64_t m_ullLastProcessTime;   /*Last proccess time */
 }ProcessConfig_t;
 
-//********************************.Sensor Result.******************************* 
+//********************************.Sensor Result.*************************************** 
 //.Description   : Includes members which stores polled results and used for processing
 //************************************************************************************** 
 typedef struct
@@ -83,11 +82,14 @@ typedef struct
         int32_t lIntValue;
         char StringValue[STR_LEN+1];
     }m_Value;                        /* Union for storing polled values*/
-}SensorResult;
+}SensorResult_t;
 
+int32_t sReadTemperature(bool *pReadStatus);
+int32_t sReadPressure(bool *pReadStatus);
+void sReadConfigVersion(char *pBuffer);
 long long GetTimeMs();
-Read_Data_Status_t SetPolledValue(ParamId_t Id,const SensorResult *pcSetSensorData);
-Read_Data_Status_t GetPolledValue(ParamId_t Id,SensorResult *pGetSensorData);
+Read_Data_Status_t SetPolledValue(ParamId_t Id, const SensorResult_t *pcSetSensorData);
+Read_Data_Status_t GetPolledValue(ParamId_t Id, SensorResult_t *pGetSensorData);
 
 void* PollingThread(void *arg);
 void* ProcessingThread(void *arg);
