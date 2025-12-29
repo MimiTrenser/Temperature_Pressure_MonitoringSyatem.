@@ -111,28 +111,8 @@ void sReadConfigVersion(char *pBuffer)
 void* PollingThread(void *arg)
 {
     (void)arg;
-    static bool StackPrinted = false;
     while (1)
     {
-        if(!StackPrinted)
-        {
-        pthread_attr_t attr;
-        void *StackBase;
-        size_t StackLimit;
-        pthread_getattr_np(pthread_self(), &attr);
-        pthread_attr_getstack(&attr, &StackBase, &StackLimit);
-
-        // The Top of the stack
-        void *StackTop = (char*)StackBase + StackLimit;
-
-        // To check current usage at any point:
-        int CurrentMarker; // This variable lives on the current stack tip
-        size_t CurrentlyUsed = (size_t)StackTop - (size_t)&CurrentMarker;
-
-        printf("Actual Stack Used for Polling Thread: %zu bytes (out of %zu)\n", CurrentlyUsed, StackLimit);
-        StackPrinted = true;
-        }
-    
         uint64_t ullCurrentTime = GetTimeMs();
         static bool ucReadStatus = true;
         volatile int32_t lReadValue = ZERO;
