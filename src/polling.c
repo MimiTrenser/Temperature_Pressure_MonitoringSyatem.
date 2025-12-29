@@ -20,10 +20,11 @@
 #include <pthread.h>
 #include <stdbool.h>
 
-#define TemperatureLowerBound -20
-#define TemperatureUpperBound 100
-#define PressureLowerBound 0
-#define PressureUpperBound 10000
+#define TEMPERATURE_LOWERBOUND -20
+#define TEMPERATURE_UPPERBOUND 100
+#define PRESSURE_LOWERBOUND 0
+#define PRESSURE_UPPERBOUND 10000
+#define ZERO 0
 
 //******************************.gPollingTable.****************************************** 
 //Purpose : Parses the Configuration parameters of Temperature,Pressure & Config version.
@@ -47,8 +48,8 @@ int32_t sReadTemperature(bool *pReadStatus)//todo
         return DATA_ERROR;
     }
     static int32_t sTemperature; 
-    sTemperature = (TemperatureLowerBound + rand() % 141);                           /* Genereate random values from 0 to 120 */
-    if(sTemperature < TemperatureLowerBound || sTemperature > TemperatureUpperBound) /* To check temp values are out of bound */
+    sTemperature = (TEMPERATURE_LOWERBOUND + rand() % 141);                           /* Genereate random values from 0 to 120 */
+    if(sTemperature < TEMPERATURE_LOWERBOUND || sTemperature > TEMPERATURE_UPPERBOUND) /* To check temp values are out of bound */
     {
         *pReadStatus = false;
     }
@@ -73,7 +74,7 @@ int32_t sReadPressure(bool *pReadStatus)
     }
     static int32_t sPressure;
     sPressure = (rand() % 11001);                                        /* Generate Random values from 0 to 11000 */
-    if(sPressure < PressureLowerBound|| sPressure > PressureUpperBound)  /* To check pressure values are out of bound */
+    if(sPressure < PRESSURE_LOWERBOUND || sPressure > PRESSURE_UPPERBOUND)  /* To check pressure values are out of bound */
     {
         *pReadStatus = false;
     }
@@ -110,11 +111,32 @@ void sReadConfigVersion(char *pBuffer)
 void* PollingThread(void *arg)
 {
     (void)arg;
+    static bool StackPrinted = false;
     while (1)
     {
+        if(!StackPrinted)
+        {
+        pthread_attr_t attr;
+        void *StackBase;
+        size_t StackLimit;
+        pthread_getattr_np(pthread_self(), &attr);
+        pthread_attr_getstack(&attr, &StackBase, &StackLimit);
+
+        // The Top of the stack
+        void *StackTop = (char*)StackBase + StackLimit;
+
+        // To check current usage at any point:
+        int CurrentMarker; // This variable lives on the current stack tip
+        size_t CurrentlyUsed = (size_t)StackTop - (size_t)&CurrentMarker;
+
+        printf("Actual Stack Used for Polling Thread: %zu bytes (out of %zu)\n", CurrentlyUsed, StackLimit);
+        StackPrinted = true;
+        }
+    
         uint64_t ullCurrentTime = GetTimeMs();
         static bool ucReadStatus = true;
-        for (int i = 0; i < (int)POLL_TABLE_SIZE; i++)
+        volatile int32_t lReadValue = ZERO;
+        for (int i = ZERO; i < (int)POLL_TABLE_SIZE; i++)
         {
             PollingConfig_t *Configuration = &gPollingTable[i];
 
@@ -138,11 +160,7 @@ void* PollingThread(void *arg)
                     }
                     else
                     {
-                        PolledSensorData.m_Value.lIntValue = Configuration->m_ReadFn.pfnReadInt(&ucReadStatus);
-                        if(PolledSensorData.m_Value.lIntValue == DATA_ERROR)
-                        {
-                            printf("Failed to read Sensor due to invalid status pointer\n");
-                        }
+                        lReadValue = Configuration->m_ReadFn.pfnReadInt(&ucReadStatus);
                     }
                     if(ucReadStatus == false)
                     {
@@ -158,6 +176,10 @@ void* PollingThread(void *arg)
                         {
                             printf("Invalid Data\n");
                         }
+                    }
+                    else
+                    {
+                        PolledSensorData.m_Value.lIntValue = lReadValue;
                     }
                     eDataStatus = SetPolledValue(Configuration->m_eParam, &PolledSensorData);
                     if(eDataStatus == DATA_ERROR)
@@ -183,11 +205,7 @@ void* PollingThread(void *arg)
                     PolledSensorData.m_eParam = Configuration->m_eParam;
                     if(Configuration->m_eType == PARAM_TYPE_INT)
                     {
-                        PolledSensorData.m_Value.lIntValue = Configuration->m_ReadFn.pfnReadInt(&ucReadStatus);
-                        if(PolledSensorData.m_Value.lIntValue == DATA_ERROR)
-                        {
-                            printf("Failed to read Sensor due to invalid status pointer\n");
-                        }
+                        lReadValue = Configuration->m_ReadFn.pfnReadInt(&ucReadStatus);
                         if(ucReadStatus == false)
                         {
                             if(PolledSensorData.m_eParam == PARAM_TEMP)
@@ -203,6 +221,10 @@ void* PollingThread(void *arg)
                                 printf("Invalid Data\n");
                             }
                         }
+                        else
+                        {
+                            PolledSensorData.m_Value.lIntValue = lReadValue;
+                        }
                         eDataStatus = SetPolledValue(Configuration->m_eParam,&PolledSensorData);
                         if(eDataStatus == DATA_ERROR)
                         {
@@ -213,6 +235,10 @@ void* PollingThread(void *arg)
                             printf("Memory Allocation failed for polling data\n");
                         }
                         Configuration->m_ullLastPollTime = ullCurrentTime;
+                    }
+                    else
+                    {
+                        /* Do Nothing */
                     } 
                 } 
             }
