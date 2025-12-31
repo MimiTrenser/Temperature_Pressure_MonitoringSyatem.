@@ -3,7 +3,7 @@
 //  All Rights Reserved 
 //********************************************************************************************************** 
 // 
-// File    : FileName.cpp 
+// File    : process.c
 // Summary : Process.c file executes Process Thread.Process the Temperarture and
 //           pressure values as per requirement
 // Note    : 
@@ -11,7 +11,7 @@
 // Date    : 19/12/2025
 // 
 //**********************************************************************************************************
-#include "database.h"
+#include "../include/database.h"
 #include <stdio.h>
 #include <unistd.h>
 #include <pthread.h>
@@ -24,6 +24,7 @@ ProcessConfig_t gProcessTable[] = {{PARAM_TEMP, 200, -10, 70, 400, 0, 0},
 //******************************.SendNotificationTemperature.************************************************
 //Purpose : Print function to indicate Temperature violated threshold value
 //Inputs  :  int value - Violated Temperature Value.
+//Return  : Void return
 //Notes   : Threshold for temperarture is -10 to 20
 //***********************************************************************************************************
 static void SendNotificationTemperature(int value)
@@ -34,6 +35,7 @@ static void SendNotificationTemperature(int value)
 //******************************.SendNotificationPressure.***************************************************
 //Purpose : Print function to indicate Pressure violated threshold value
 //Inputs  :  int value - Violated Pressure Value.
+//Return  : Void return
 //Notes   : Threshold for pressure is 400 to 6000
 //***********************************************************************************************************
 static void SendNotificationPressure(int value)
@@ -44,6 +46,7 @@ static void SendNotificationPressure(int value)
 //******************************.ProcessTemperatureAction.***************************************************
 //Purpose : Print Temperature value
 //Inputs  :  int32_t value - Temperature Value.
+//Return  : Void return
 //***********************************************************************************************************
 static void ProcessTemperatureAction(int32_t value)
 {
@@ -54,16 +57,19 @@ static void ProcessTemperatureAction(int32_t value)
 //******************************.ProcessPressureAction.******************************************************
 //Purpose : Print  Pressure value
 //Inputs  :  int32_t value - Pressure Value.
+//Return  : Void return
 //***********************************************************************************************************
 static void ProcessPressureAction(int32_t value)
 {
     printf("Pressure: %d\n", value);
+    //int32_t x = 10;
 }
 
 //******************************.ProcessingThread.************************************************************ 
 //Purpose : Process the sesor data with the requirements
 //Notes   : It is a Process Thread which periodically process sensor data as per 
-//          requirements 
+//          requirements
+//Return  : Void return 
 //************************************************************************************************************
 void* ProcessingThread(void *arg)
 {
@@ -73,13 +79,13 @@ void* ProcessingThread(void *arg)
         for (int i = 0; i < (int)PROCESS_TABLE_SIZE; i++)
         {
             int64_t llCurrentTime = GetTimeMs();
-            SensorResult_t ProcessSensorData;
+            SensorResult_t ProcessSensorData = {0};
             Read_Data_Status_t eDataStatus;
             ProcessConfig_t *Configuration = &gProcessTable[i];
             ProcessSensorData.m_eParam = Configuration->m_eParam;
             if((llCurrentTime - Configuration->m_ullLastProcessTime) >= (Configuration->m_ullProcessIntervalMs))
             {
-                eDataStatus = GetPolledValue(Configuration->m_eParam, &ProcessSensorData);
+                eDataStatus = Sensor_PolledValue_Get(Configuration->m_eParam, &ProcessSensorData);
                 if(eDataStatus == DATA_ERROR)
                 {
                     printf("Invalid Parameter Type or Data is not present\n");

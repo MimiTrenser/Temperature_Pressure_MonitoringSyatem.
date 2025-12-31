@@ -12,15 +12,15 @@
 //***************************************************************************** 
 #include <pthread.h>
 #include <stdio.h>
-#include <database.h>
+#include "../include/database.h"
 #include <unistd.h>
 
 #define SUCCESS 0
 
 int main(void)
 {
-    pthread_t pthread1;
-    pthread_t pthread2;
+    pthread_t pthread1 = {0};
+    pthread_t pthread2 = {0};
     int status = SUCCESS;
 
     status = pthread_create(&pthread1, NULL, PollingThread, NULL);/* Polling Thread create */
@@ -39,5 +39,4 @@ int main(void)
     pthread_join(pthread2, NULL);
 
     return 0;
-
 }

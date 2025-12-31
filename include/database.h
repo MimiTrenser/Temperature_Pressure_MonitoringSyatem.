@@ -80,7 +80,7 @@ typedef struct
     union 
     {
         int32_t lIntValue;
-        char StringValue[STR_LEN+1];
+        char cStringValue[STR_LEN+1];
     }m_Value;
 }SensorResult_t;
 
@@ -88,8 +88,8 @@ int32_t sReadTemperature(bool *pReadStatus);
 int32_t sReadPressure(bool *pReadStatus);
 void sReadConfigVersion(char *pBuffer);
 long long GetTimeMs();
-Read_Data_Status_t SetPolledValue(ParamId_t Id, const SensorResult_t *pcSetSensorData);
-Read_Data_Status_t GetPolledValue(ParamId_t Id, SensorResult_t *pGetSensorData);
+Read_Data_Status_t Sensor_PolledValue_Set(ParamId_t Id, const SensorResult_t *pcSetSensorData);
+Read_Data_Status_t Sensor_PolledValue_Get(ParamId_t Id, SensorResult_t *pGetSensorData);
 
 void* PollingThread(void *arg);
 void* ProcessingThread(void *arg);

@@ -11,7 +11,7 @@
 // Date    : 19/12/2025
 // 
 //*****************************************************************************
-#include "database.h"
+#include "../include/database.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -26,9 +26,9 @@
 #define PRESSURE_UPPERBOUND 10000
 #define ZERO 0
 
-//******************************.gPollingTable.****************************************** 
+//******************************.gPollingTable.************************************************************************ 
 //Purpose : Parses the Configuration parameters of Temperature,Pressure & Config version.
-//*************************************************************************************** 
+//********************************************************************************************************************* 
 PollingConfig_t gPollingTable[] = {{PARAM_TEMP, 50, PARAM_TYPE_INT, .m_ReadFn.pfnReadInt = sReadTemperature, 0, 0},
                                     {PARAM_PRESSURE, 200, PARAM_TYPE_INT, .m_ReadFn.pfnReadInt = sReadPressure, 0, 0},
                                     {PARAM_CONFIG_VERSION, 0, PARAM_TYPE_STRING, .m_ReadFn.pfnReadstr = sReadConfigVersion, 0, 0}};
@@ -88,6 +88,7 @@ int32_t sReadPressure(bool *pReadStatus)
 //******************************.sReadConfigVersion.******************************** 
 //Purpose : To read configuration version one time
 //Inputs  : pBuffer : Pointer buffer which stores the Configuration Version
+//Return  : Void return
 //Notes   : Configuration version read only once 
 //********************************************************************************** 
 void sReadConfigVersion(char *pBuffer)
@@ -130,13 +131,13 @@ void* PollingThread(void *arg)
                     {
                         continue;
                     }
-                    SensorResult_t PolledSensorData;
+                    SensorResult_t PolledSensorData = {0};
                     Read_Data_Status_t eDataStatus;
                     PolledSensorData.m_eType = Configuration->m_eType;
                     PolledSensorData.m_eParam = Configuration->m_eParam;
                     if(Configuration->m_eType == PARAM_TYPE_STRING)
                     {
-                        Configuration->m_ReadFn.pfnReadstr(PolledSensorData.m_Value.StringValue);
+                        Configuration->m_ReadFn.pfnReadstr(PolledSensorData.m_Value.cStringValue);
                     }
                     else
                     {
@@ -161,7 +162,7 @@ void* PollingThread(void *arg)
                     {
                         PolledSensorData.m_Value.lIntValue = lReadValue;
                     }
-                    eDataStatus = SetPolledValue(Configuration->m_eParam, &PolledSensorData);
+                    eDataStatus = Sensor_PolledValue_Set(Configuration->m_eParam, &PolledSensorData);
                     if(eDataStatus == DATA_ERROR)
                     {
                         printf("Invalid Parameter or Read error\n");
@@ -179,7 +180,7 @@ void* PollingThread(void *arg)
 
                 else
                 {
-                    SensorResult_t PolledSensorData;
+                    SensorResult_t PolledSensorData = {0};
                     Read_Data_Status_t eDataStatus;
                     PolledSensorData.m_eType = Configuration->m_eType;
                     PolledSensorData.m_eParam = Configuration->m_eParam;
@@ -205,7 +206,7 @@ void* PollingThread(void *arg)
                         {
                             PolledSensorData.m_Value.lIntValue = lReadValue;
                         }
-                        eDataStatus = SetPolledValue(Configuration->m_eParam,&PolledSensorData);
+                        eDataStatus = Sensor_PolledValue_Set(Configuration->m_eParam,&PolledSensorData);
                         if(eDataStatus == DATA_ERROR)
                         {
                             printf("Invalid Parameter or Read error\n");
