@@ -14,6 +14,8 @@
 #include <stdio.h>
 #include "../include/database.h"
 #include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define SUCCESS 0
 
@@ -22,6 +24,8 @@ int main(void)
     pthread_t pthread1 = {0};
     pthread_t pthread2 = {0};
     int status = SUCCESS;
+    char *buff = (char*)malloc(sizeof(char)*100);
+    memset(buff, 0, sizeof(char)*100);
 
     status = pthread_create(&pthread1, NULL, PollingThread, NULL);/* Polling Thread create */
     if(status != SUCCESS)
