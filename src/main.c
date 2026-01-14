@@ -27,10 +27,12 @@ int main(void)
     char *buff = (char*)malloc(sizeof(char)*100);
     memset(buff, 0, sizeof(char)*100);
 
+
     status = pthread_create(&pthread1, NULL, PollingThread, NULL);/* Polling Thread create */
     if(status != SUCCESS)
     {
         printf("Thread Creation Failed\n");
+        return 0;
     }
 
     status = pthread_create(&pthread2, NULL, ProcessingThread, NULL);/* Processing Thread Create */
