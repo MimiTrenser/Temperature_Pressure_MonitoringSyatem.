@@ -1,14 +1,14 @@
 //********************** Temparature Pressure Monitoring System ****************
-// Copyright (c) 2026 Trenser Technology Solutions (P) Ltd 
-// All Rights Reserved 
+// Copyright (c) 2026 Trenser Technology Solutions (P) Ltd
+// All Rights Reserved
 //******************************************************************************
-// 
-// Summary    : The objective is to develop a multi-threaded embedded 
-//              application to monitor environmental parameters 
-//              (Temperature and Pressure) and system metadata
-//              (Configuration Version). 
-// Note       : None
-// 
+//
+// Summary      : The objective is to develop a multi-threaded embedded 
+//                application to monitor environmental parameters 
+//                (Temperature and Pressure) and system metadata
+//                (Configuration Version). 
+// Note         : None
+//
 //******************************************************************************
 
 #ifndef DATABASE_H
@@ -27,20 +27,20 @@
 
 #define STR_LEN (5)
 
-//***************************** Global Types *********************************** 
+//***************************** Global Types ***********************************
  
-//***************************** Global Constants ******************************* 
+//***************************** Global Constants *******************************
  
-//***************************** Global Variables ******************************* 
+//***************************** Global Variables *******************************
  
-//***************************** Forward Declarations *************************** 
+//***************************** Forward Declarations ***************************
 
 typedef enum
 {
     DATA_ALLOCATION_SUCCESS,
     DATA_ERROR,
     DATA_ALLOCATION_FAILED
-}Read_Data_Status_t;
+} READ_DATA_STATUS_t;
 
 typedef enum
 {
@@ -48,69 +48,69 @@ typedef enum
     PARAM_PRESSURE ,
     PARAM_CONFIG_VERSION,
     PARAM_MAX
-} ParamId_t;
+} PARAM_ID_t;
 
 typedef enum
 {
     PARAM_TYPE_INT,
     PARAM_TYPE_STRING
-}ParamType_t;
+} PARAM_TYPE_t;
 
 //******************************** Polling Configuration ***********************
 // Description   : Includes polling Configuration parameters
-//****************************************************************************** 
+//******************************************************************************
 typedef struct
 {
-    ParamId_t m_eParam;
+    PARAM_ID_t m_eParam;
     uint64_t m_ullPollIntervalMs;
-    ParamType_t m_eType;
+    PARAM_TYPE_t m_eType;
     union 
     {
         int32_t (*pfnReadInt)(bool *ucReadStatus);
         void (*pfnReadstr)(char *buf);
-    }m_ReadFn;
+    }m_READFN;
     uint64_t m_ullLastPollTime;
     uint8_t m_ulPolledOnce;
-} PollingConfig_t;
+} POLLING_CONFIG_t;
 
 //********************************.Process Configuration.***********************
 // Description   : Includes Process Configuration parameters
-//****************************************************************************** 
+//******************************************************************************
 typedef struct
 {
-    ParamId_t m_eParam;
+    PARAM_ID_t m_eParam;
     uint64_t m_ullProcessIntervalMs;
     int32_t m_lMiniThreshold;
     int64_t m_llMaxThreshold;
     uint32_t m_ulSamplingTime;
     uint32_t m_ulViolationTime;
     uint64_t m_ullLastProcessTime;
-}ProcessConfig_t;
+} PROCESS_CONFIG_t;
 
-//********************************.Sensor Result.******************************* 
-// Description   : Includes members which stores polled results and used for 
+//********************************.Sensor Result.*******************************
+// Description   : Includes members which stores polled results and used for
 //                 processing
-//****************************************************************************** 
+//******************************************************************************
 typedef struct
 {
-    ParamType_t m_eType;
-    ParamId_t m_eParam;
-    union 
+    PARAM_TYPE_t m_eType;
+    PARAM_ID_t m_eParam;
+    union
     {
         int32_t lIntValue;
         char cStringValue[STR_LEN+1];
-    }m_Value;
-}SensorResult_t;
+    }m_VALUE;
+} SENSOR_RESULT_t;
 
-int32_t sReadTemperature(bool *pReadStatus);
-int32_t sReadPressure(bool *pReadStatus);
-void sReadConfigVersion(char *pBuffer);
+int32_t readTemperature(bool *pblReadStatus);
+int32_t readPressure(bool *pblReadStatus);
+void readConfigVersion(char *pBuffer);
 long long GetTimeMs();
-Read_Data_Status_t Sensor_PolledValue_Set(ParamId_t Id, const SensorResult_t *pcSetSensorData);
-Read_Data_Status_t Sensor_PolledValue_Get(ParamId_t Id, SensorResult_t *pGetSensorData);
+READ_DATA_STATUS_t sensorPolledValueSet(PARAM_ID_t Id, const SENSOR_RESULT_t *pcSetSensorData);
+READ_DATA_STATUS_t sensorPolledValueGet(PARAM_ID_t Id, SENSOR_RESULT_t *pGetSensorData);
 
-void* PollingThread(void *arg);
-void* ProcessingThread(void *arg);
+void* pollingThread(void *arg);
+void* processingThread(void *arg);
 
 #endif // _DATABASE_H
 //EOF

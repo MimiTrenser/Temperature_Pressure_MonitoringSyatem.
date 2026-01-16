@@ -1,114 +1,130 @@
-//************************ Temparature Pressure Monitoring System **************
+//******************* Temparature Pressure Monitoring System *******************
 // Copyright (c) 2026 Trenser Technology Solutions (P) Ltd
-// All Rights Reserved 
-//****************************************************************************** 
-// 
-// File    : Polling.c
-// Summary : Polling.c file includes execution of Polling Thread, Read 
-//           Temperature and Pressure sensors
-// Note    : 
-// Author  : Mimi C.S
-// Date    : 19/12/2025
-// 
+// All Rights Reserved
+//******************************************************************************
+//
+// File     : Polling.c
+// Summary  : Polling.c file includes execution of Polling Thread, Read
+//            Temperature and Pressure sensors
+// Note     :
+// Author   : Mimi C.S
+// Date     : 19/12/2025
+//
 //******************************************************************************
 
-//******************************* Include Files ******************************** 
+//******************************* Include Files ********************************
 #include "database.h"
 
-#define TEMPERATURE_LOWERBOUND   (-20)
-#define TEMPERATURE_UPPERBOUND   (100)
-#define PRESSURE_LOWERBOUND      (0)
-#define PRESSURE_UPPERBOUND      (10000)
-#define ZERO                     (0)
+//***************************** Local Constants ********************************
+#define TEMPERATURE_LOWERBOUND              (-20)
+#define TEMPERATURE_UPPERBOUND              (100)
+#define PRESSURE_LOWERBOUND                 (0)
+#define PRESSURE_UPPERBOUND                 (10000)
+#define ZERO                                (0)
+#define RAND_RANGE_TEMPERATURE              (141)
+#define RAND_RANGE_PRESSURE                 (11001)
+#define BUFFER_SIZE                         (4)
+#define POLLING_INTERVAL_TEMPERATURE        (50)
+#define POLLING_INTERVAL_PRESSURE           (200)
+#define POLLING_INTERVAL_CONFIG_VERSION     (0)
+#define LAST_POLLTIME_TEMPERATURE           (0)
+#define LAST_POLLTIME_PRESSURE              (0)
+#define LAST_POLLTIME_CONFIG_VERSION        (0)
+#define POLLED_ONCE_TEMPERATURE             (0)
+#define POLLED_ONCE_PRESSURE                (0)
+#define POLLED_ONCE_CONFIG_VERSION          (0)
 
-//***************************** Local Types ************************************ 
- 
-//***************************** Local Constants ******************************** 
- 
-//***************************** Local Variables ********************************  
 
-//****************************** gPollingTable *********************************
-//Purpose : Parses the Configuration parameters of Temperature,Pressure & Config
-//          version.
-//Notes   : None
+//***************************** Local Types ************************************
+
+//***************************** Local Variables ********************************
+
+//***************************** gPollingTable **********************************
+//Purpose   : Parses the Configuration parameters of Temperature,Pressure &
+//            Configversion.
+//Notes     : None
 //******************************************************************************
-PollingConfig_t gPollingTable[] = {{PARAM_TEMP, 50, PARAM_TYPE_INT, .m_ReadFn.pfnReadInt = sReadTemperature, 0, 0},
-                                    {PARAM_PRESSURE, 200, PARAM_TYPE_INT, .m_ReadFn.pfnReadInt = sReadPressure, 0, 0},
-                                    {PARAM_CONFIG_VERSION, 0, PARAM_TYPE_STRING, .m_ReadFn.pfnReadstr = sReadConfigVersion, 0, 0}};
+POLLING_CONFIG_t gPollingTable[] = {{PARAM_TEMP, POLLING_INTERVAL_TEMPERATURE, PARAM_TYPE_INT, .m_READFN.pfnReadInt = readTemperature, LAST_POLLTIME_TEMPERATURE, POLLED_ONCE_TEMPERATURE},
+                                    {PARAM_PRESSURE, POLLING_INTERVAL_PRESSURE, PARAM_TYPE_INT, .m_READFN.pfnReadInt = readPressure, LAST_POLLTIME_PRESSURE, POLLED_ONCE_PRESSURE},
+                                    {PARAM_CONFIG_VERSION, POLLING_INTERVAL_CONFIG_VERSION, PARAM_TYPE_STRING, .m_READFN.pfnReadstr = readConfigVersion, LAST_POLLTIME_CONFIG_VERSION, POLLED_ONCE_CONFIG_VERSION}};
 
-#define POLL_TABLE_SIZE (sizeof(gPollingTable) / sizeof(PollingConfig_t))
+#define POLL_TABLE_SIZE (sizeof(gPollingTable) / sizeof(POLLING_CONFIG_t))
 
 //****************************** Local Functions *******************************
 
-//******************************.sReadTemperature.******************************
-//Purpose : Generates a simulated Temperature reading and validates it against 
-//          bounds.
-//Inputs  : pReadStatus - Pointer to a boolean to store the success/failure 
-//          status.
-//Return  : The generated temperature value (-20 to 120).
-//Notes   : Simulated via rand(); depends on TemperatureLowerBound and 
-//          TemperatureUpperBound 
-//****************************************************************************** 
-int32_t sReadTemperature(bool *pReadStatus)
+//****************************** ReadTemperature *******************************
+//Purpose   : Generates a simulated Temperature reading and validates it against
+//            bounds.
+//Inputs    : pblReadStatus - Pointer to a boolean to store the success/failure
+//            status.
+//Return    : The generated temperature value (-20 to 120).
+//Notes     : Simulated via rand(); depends on TemperatureLowerBound and 
+//            TemperatureUpperBound 
+//******************************************************************************
+int32_t readTemperature(bool *pblReadStatus)
 {
-    if(pReadStatus == NULL)
+    if(pblReadStatus == NULL)
     {
         return DATA_ERROR;
     }
 
-    static int32_t sTemperature;
+    static int32_t slTemperature = 0;
+
     /* Genereate random values from 0 to 120 */ 
-    sTemperature = (TEMPERATURE_LOWERBOUND + rand() % 141); 
-                              
-    if(sTemperature < TEMPERATURE_LOWERBOUND || sTemperature > TEMPERATURE_UPPERBOUND)
+    slTemperature = (TEMPERATURE_LOWERBOUND + rand() % RAND_RANGE_TEMPERATURE); 
+
+    if(slTemperature < TEMPERATURE_LOWERBOUND ||
+        slTemperature > TEMPERATURE_UPPERBOUND)
     {
-        *pReadStatus = false;
+        *pblReadStatus = false;
     }
     else
     {
-        *pReadStatus = true;
+        *pblReadStatus = true;
     }
-    return sTemperature;
+    return slTemperature;
 }
  
 //****************************** sReadPressure ********************************* 
 //Purpose : Generates a simulated pressure reading and validates it against 
 //          bounds.
-//Inputs  : pReadStatus - Pointer to a boolean to store the success/failure 
+//Inputs  : pblReadStatus - Pointer to a boolean to store the success/failure 
 //          status.
 //Return  : The generated pressure value (0 to 11000).
 //Notes   : Simulated via rand(); depends on PressureLowerBound and 
 //          PressureUpperBound
 //******************************************************************************
-int32_t sReadPressure(bool *pReadStatus)
+int32_t readPressure(bool *pblReadStatus)
 {
-    if(pReadStatus == NULL)
+    if(pblReadStatus == NULL)
     {
         return DATA_ERROR;
     }
 
-    static int32_t sPressure;
+    static int32_t sPressure = 0;
+
     /* Generate Random values from 0 to 11000 */
-    sPressure = (rand() % 11001); 
+    sPressure = (rand() % RAND_RANGE_PRESSURE); 
                                            
     if(sPressure < PRESSURE_LOWERBOUND || sPressure > PRESSURE_UPPERBOUND)
     {
-        *pReadStatus = false;
+        *pblReadStatus = false;
     }
     else
     {
-        *pReadStatus = true;
+        *pblReadStatus = true;
     }
+
     return sPressure;
 }
 
 //****************************** sReadConfigVersion ****************************
-//Purpose : To read configuration version one time
-//Inputs  : pBuffer : Pointer buffer which stores the Configuration Version
-//Return  : Void return
-//Notes   : Configuration version read only once 
-//****************************************************************************** 
-void sReadConfigVersion(char *pBuffer)
+//Purpose   : To read configuration version one time
+//Inputs    : pBuffer : Pointer buffer which stores the Configuration Version
+//Return    : Void return
+//Notes     : Configuration version read only once
+//******************************************************************************
+void readConfigVersion(char *pBuffer)
 {
     if(pBuffer == NULL)
     {
@@ -116,9 +132,9 @@ void sReadConfigVersion(char *pBuffer)
     }
     else
     {
-    strcpy(pBuffer,"1234");
-    pBuffer[4] = '\0';
-    printf("Configuration Version : %s\n", pBuffer);
+        strcpy(pBuffer,"1234");
+        pBuffer[BUFFER_SIZE] = '\0';
+        printf("Configuration Version : %s\n", pBuffer);
     }
 }
 
@@ -126,18 +142,19 @@ void sReadConfigVersion(char *pBuffer)
 //Purpose : Periodically poll sensor data as per requirements
 //Notes   : Temperature and pressure have different polling intervals 
 //******************************************************************************
-void* PollingThread(void *arg)
+void* pollingThread(void *arg)
 {
     (void)arg;
+
     while (1)
     {
         uint64_t ullCurrentTime = GetTimeMs();
-        static bool ucReadStatus = true;
+        static bool blReadStatus = true;
         volatile int32_t lReadValue = ZERO;
 
         for (int i = ZERO; i < (int)POLL_TABLE_SIZE; i++)
         {
-            PollingConfig_t *Configuration = &gPollingTable[i];
+            POLLING_CONFIG_t *Configuration = &gPollingTable[i];
 
             /*************************** Poll Once*****************************/
 
@@ -149,20 +166,21 @@ void* PollingThread(void *arg)
                     {
                         continue;
                     }
-                    SensorResult_t PolledSensorData = {0};
-                    Read_Data_Status_t eDataStatus;
+                    SENSOR_RESULT_t PolledSensorData = {0};
+                    READ_DATA_STATUS_t eDataStatus;
                     PolledSensorData.m_eType = Configuration->m_eType;
                     PolledSensorData.m_eParam = Configuration->m_eParam;
 
                     if(Configuration->m_eType == PARAM_TYPE_STRING)
                     {
-                        Configuration->m_ReadFn.pfnReadstr(PolledSensorData.m_Value.cStringValue);
+                        Configuration->m_READFN.pfnReadstr(PolledSensorData.m_VALUE.cStringValue);
                     }
                     else
                     {
-                        lReadValue = Configuration->m_ReadFn.pfnReadInt(&ucReadStatus);
+                        lReadValue = Configuration->m_READFN.pfnReadInt(&blReadStatus);
                     }
-                    if(ucReadStatus == false)
+
+                    if(blReadStatus == false)
                     {
                         if(PolledSensorData.m_eParam == PARAM_TEMP)
                         {
@@ -179,9 +197,11 @@ void* PollingThread(void *arg)
                     }
                     else
                     {
-                        PolledSensorData.m_Value.lIntValue = lReadValue;
+                        PolledSensorData.m_VALUE.lIntValue = lReadValue;
                     }
-                    eDataStatus = Sensor_PolledValue_Set(Configuration->m_eParam, &PolledSensorData);
+
+                    eDataStatus = sensorPolledValueSet(Configuration->m_eParam, &PolledSensorData);
+
                     if(eDataStatus == DATA_ERROR)
                     {
                         printf("Invalid Parameter or Read error\n");
@@ -194,6 +214,7 @@ void* PollingThread(void *arg)
                     {
                         /* Nothing to do */
                     }
+
                     Configuration->m_ulPolledOnce = 1;
                     Configuration->m_ullLastPollTime = ullCurrentTime;
                     continue;
@@ -203,16 +224,16 @@ void* PollingThread(void *arg)
 
                 else
                 {
-                    SensorResult_t PolledSensorData = {0};
-                    Read_Data_Status_t eDataStatus;
+                    SENSOR_RESULT_t PolledSensorData = {0};
+                    READ_DATA_STATUS_t eDataStatus;
                     PolledSensorData.m_eType = Configuration->m_eType;
                     PolledSensorData.m_eParam = Configuration->m_eParam;
 
                     if(Configuration->m_eType == PARAM_TYPE_INT)
                     {
-                        lReadValue = Configuration->m_ReadFn.pfnReadInt(&ucReadStatus);
+                        lReadValue = Configuration->m_READFN.pfnReadInt(&blReadStatus);
 
-                        if(ucReadStatus == false)
+                        if(blReadStatus == false)
                         {
                             if(PolledSensorData.m_eParam == PARAM_TEMP)
                             {
@@ -229,9 +250,9 @@ void* PollingThread(void *arg)
                         }
                         else
                         {
-                            PolledSensorData.m_Value.lIntValue = lReadValue;
+                            PolledSensorData.m_VALUE.lIntValue = lReadValue;
                         }
-                        eDataStatus = Sensor_PolledValue_Set(Configuration->m_eParam,&PolledSensorData);
+                        eDataStatus = sensorPolledValueSet(Configuration->m_eParam, &PolledSensorData);
 
                         if(eDataStatus == DATA_ERROR)
                         {
@@ -246,11 +267,12 @@ void* PollingThread(void *arg)
                     else
                     {
                         /* Do Nothing */
-                    } 
+                    }
                 } 
             }
         }
         usleep(10000);/* 10Ms */
     }
+
     return NULL;
 }
