@@ -28,7 +28,7 @@ static int32_t *s_plDataBase = NULL;
 //Purpose   : To get the current System Time in Ms
 //Return    : Updated system time in Ms
 //******************************************************************************
-long long GetTimeMs() 
+long long getTimeMs() 
 {
     struct timeval tv = {0};
 

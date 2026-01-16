@@ -105,7 +105,7 @@ void* processingThread(void *arg)
     {
         for (int i = 0; i < (int)PROCESS_TABLE_SIZE; i++)
         {
-            int64_t llCurrentTime = GetTimeMs();
+            int64_t llCurrentTime = getTimeMs();
             SENSOR_RESULT_t ProcessSensorData = {0};
             READ_DATA_STATUS_t eDataStatus;
             PROCESS_CONFIG_t *Configuration = &gProcessTable[i];

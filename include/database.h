@@ -105,7 +105,7 @@ typedef struct
 int32_t readTemperature(bool *pblReadStatus);
 int32_t readPressure(bool *pblReadStatus);
 void readConfigVersion(char *pBuffer);
-long long GetTimeMs();
+long long getTimeMs();
 READ_DATA_STATUS_t sensorPolledValueSet(PARAM_ID_t Id, const SENSOR_RESULT_t *pcSetSensorData);
 READ_DATA_STATUS_t sensorPolledValueGet(PARAM_ID_t Id, SENSOR_RESULT_t *pGetSensorData);
 

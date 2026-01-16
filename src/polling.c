@@ -148,7 +148,7 @@ void* pollingThread(void *arg)
 
     while (1)
     {
-        uint64_t ullCurrentTime = GetTimeMs();
+        uint64_t ullCurrentTime = getTimeMs();
         static bool blReadStatus = true;
         volatile int32_t lReadValue = ZERO;
 
