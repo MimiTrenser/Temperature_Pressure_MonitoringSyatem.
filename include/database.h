@@ -1,22 +1,39 @@
-//**************************** Temparature Pressure Monitoring System ***********
-//  Copyright (c) 2021 Trenser 
-//  All Rights Reserved 
-//********************************************************************************
+//********************** Temparature Pressure Monitoring System ****************
+// Copyright (c) 2026 Trenser Technology Solutions (P) Ltd 
+// All Rights Reserved 
+//******************************************************************************
 // 
-// Summary    : The objective is to develop a multi-threaded embedded application
-//              to monitor environmental parameters (Temperature and Pressure) and
-//              system metadata (Configuration Version). 
-// Note       : 
+// Summary    : The objective is to develop a multi-threaded embedded 
+//              application to monitor environmental parameters 
+//              (Temperature and Pressure) and system metadata
+//              (Configuration Version). 
+// Note       : None
 // 
-//******************************************************************************* 
-#ifndef SENSOR_SYSTEM_H
-#define SENSOR_SYSTEM_H
+//******************************************************************************
 
+#ifndef DATABASE_H
+#define DATABASE_H
+
+//******************************* Include Files ********************************
+#include <pthread.h>
+#include <stdio.h>
+#include "database.h"
+#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
 #include <stdint.h>
 #include <sys/time.h>
 #include <stdbool.h>
 
 #define STR_LEN 5
+
+//***************************** Global Types *********************************** 
+ 
+//***************************** Global Constants ******************************* 
+ 
+//***************************** Global Variables ******************************* 
+ 
+//***************************** Forward Declarations *************************** 
 
 typedef enum
 {
@@ -39,9 +56,9 @@ typedef enum
     PARAM_TYPE_STRING
 }ParamType_t;
 
-//********************************.Polling Configuration.******************************* 
-//.Description   : Includes polling Configuration parameters
-//************************************************************************************** 
+//******************************** Polling Configuration ***********************
+// Description   : Includes polling Configuration parameters
+//****************************************************************************** 
 typedef struct
 {
     ParamId_t m_eParam;
@@ -56,9 +73,9 @@ typedef struct
     uint8_t m_ulPolledOnce;
 } PollingConfig_t;
 
-//********************************.Process Configuration.******************************* 
-//.Description   : Includes Process Configuration parameters
-//************************************************************************************** 
+//********************************.Process Configuration.***********************
+// Description   : Includes Process Configuration parameters
+//****************************************************************************** 
 typedef struct
 {
     ParamId_t m_eParam;
@@ -70,9 +87,10 @@ typedef struct
     uint64_t m_ullLastProcessTime;
 }ProcessConfig_t;
 
-//********************************.Sensor Result.*************************************** 
-//.Description   : Includes members which stores polled results and used for processing
-//************************************************************************************** 
+//********************************.Sensor Result.******************************* 
+// Description   : Includes members which stores polled results and used for 
+//                 processing
+//****************************************************************************** 
 typedef struct
 {
     ParamType_t m_eType;
@@ -94,4 +112,5 @@ Read_Data_Status_t Sensor_PolledValue_Get(ParamId_t Id, SensorResult_t *pGetSens
 void* PollingThread(void *arg);
 void* ProcessingThread(void *arg);
 
-#endif
+#endif // _DATABASE_H
+//EOF

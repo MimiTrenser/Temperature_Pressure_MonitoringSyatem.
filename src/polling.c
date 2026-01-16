@@ -1,24 +1,19 @@
-//**************************** Temparature Pressure Monitoring System ************************************** 
-//  Copyright (c) 2021 Trenser 
-//  All Rights Reserved 
-//***************************************************************************** 
+//************************ Temparature Pressure Monitoring System **************
+// Copyright (c) 2026 Trenser Technology Solutions (P) Ltd
+// All Rights Reserved 
+//****************************************************************************** 
 // 
 // File    : Polling.c
-// Summary : Polling.c file includes execution of Polling Thread,Read Temperature and
-//           Pressure sensors
+// Summary : Polling.c file includes execution of Polling Thread, Read 
+//           Temperature and Pressure sensors
 // Note    : 
 // Author  : Mimi C.S
 // Date    : 19/12/2025
 // 
-//*****************************************************************************
-#include "../include/database.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <time.h>
-#include <pthread.h>
-#include <stdbool.h>
+//******************************************************************************
+
+//******************************* Include Files ******************************** 
+#include "database.h"
 
 #define TEMPERATURE_LOWERBOUND -20
 #define TEMPERATURE_UPPERBOUND 100
@@ -26,30 +21,46 @@
 #define PRESSURE_UPPERBOUND 10000
 #define ZERO 0
 
-//******************************.gPollingTable.************************************************************************ 
-//Purpose : Parses the Configuration parameters of Temperature,Pressure & Config version.
-//********************************************************************************************************************* 
+//***************************** Local Types ************************************ 
+ 
+//***************************** Local Constants ******************************** 
+ 
+//***************************** Local Variables ********************************  
+
+//****************************** gPollingTable *********************************
+//Purpose : Parses the Configuration parameters of Temperature,Pressure & Config
+//          version.
+//Notes   : None
+//******************************************************************************
 PollingConfig_t gPollingTable[] = {{PARAM_TEMP, 50, PARAM_TYPE_INT, .m_ReadFn.pfnReadInt = sReadTemperature, 0, 0},
                                     {PARAM_PRESSURE, 200, PARAM_TYPE_INT, .m_ReadFn.pfnReadInt = sReadPressure, 0, 0},
                                     {PARAM_CONFIG_VERSION, 0, PARAM_TYPE_STRING, .m_ReadFn.pfnReadstr = sReadConfigVersion, 0, 0}};
 
 #define POLL_TABLE_SIZE (sizeof(gPollingTable) / sizeof(PollingConfig_t))
 
-//******************************.sReadTemperature.****************************************** 
-//Purpose : Generates a simulated Temperature reading and validates it against bounds.
-//Inputs  : pReadStatus - Pointer to a boolean to store the success/failure status.
+//****************************** Local Functions *******************************
+
+//******************************.sReadTemperature.******************************
+//Purpose : Generates a simulated Temperature reading and validates it against 
+//          bounds.
+//Inputs  : pReadStatus - Pointer to a boolean to store the success/failure 
+//          status.
 //Return  : The generated temperature value (-20 to 120).
-//Notes   : Simulated via rand(); depends on TemperatureLowerBound and TemperatureUpperBound 
-//****************************************************************************************** 
-int32_t sReadTemperature(bool *pReadStatus)//todo
+//Notes   : Simulated via rand(); depends on TemperatureLowerBound and 
+//          TemperatureUpperBound 
+//****************************************************************************** 
+int32_t sReadTemperature(bool *pReadStatus)
 {
     if(pReadStatus == NULL)
     {
         return DATA_ERROR;
     }
-    static int32_t sTemperature; 
-    sTemperature = (TEMPERATURE_LOWERBOUND + rand() % 141);                           /* Genereate random values from 0 to 120 */
-    if(sTemperature < TEMPERATURE_LOWERBOUND || sTemperature > TEMPERATURE_UPPERBOUND) /* To check temp values are out of bound */
+
+    static int32_t sTemperature;
+    /* Genereate random values from 0 to 120 */ 
+    sTemperature = (TEMPERATURE_LOWERBOUND + rand() % 141); 
+                              
+    if(sTemperature < TEMPERATURE_LOWERBOUND || sTemperature > TEMPERATURE_UPPERBOUND)
     {
         *pReadStatus = false;
     }
@@ -60,21 +71,27 @@ int32_t sReadTemperature(bool *pReadStatus)//todo
     return sTemperature;
 }
  
-//******************************.sReadPressure.**************************************** 
-//Purpose : Generates a simulated pressure reading and validates it against bounds.
-//Inputs  : pReadStatus - Pointer to a boolean to store the success/failure status.
+//****************************** sReadPressure ********************************* 
+//Purpose : Generates a simulated pressure reading and validates it against 
+//          bounds.
+//Inputs  : pReadStatus - Pointer to a boolean to store the success/failure 
+//          status.
 //Return  : The generated pressure value (0 to 11000).
-//Notes   : Simulated via rand(); depends on PressureLowerBound and PressureUpperBound
-//************************************************************************************** 
+//Notes   : Simulated via rand(); depends on PressureLowerBound and 
+//          PressureUpperBound
+//******************************************************************************
 int32_t sReadPressure(bool *pReadStatus)
 {
     if(pReadStatus == NULL)
     {
         return DATA_ERROR;
     }
+
     static int32_t sPressure;
-    sPressure = (rand() % 11001);                                        /* Generate Random values from 0 to 11000 */
-    if(sPressure < PRESSURE_LOWERBOUND || sPressure > PRESSURE_UPPERBOUND)  /* To check pressure values are out of bound */
+    /* Generate Random values from 0 to 11000 */
+    sPressure = (rand() % 11001); 
+                                           
+    if(sPressure < PRESSURE_LOWERBOUND || sPressure > PRESSURE_UPPERBOUND)
     {
         *pReadStatus = false;
     }
@@ -85,12 +102,12 @@ int32_t sReadPressure(bool *pReadStatus)
     return sPressure;
 }
 
-//******************************.sReadConfigVersion.******************************** 
+//****************************** sReadConfigVersion ****************************
 //Purpose : To read configuration version one time
 //Inputs  : pBuffer : Pointer buffer which stores the Configuration Version
 //Return  : Void return
 //Notes   : Configuration version read only once 
-//********************************************************************************** 
+//****************************************************************************** 
 void sReadConfigVersion(char *pBuffer)
 {
     if(pBuffer == NULL)
@@ -105,10 +122,10 @@ void sReadConfigVersion(char *pBuffer)
     }
 }
 
-//******************************.Polling Thread.********************************** 
+//******************************.Polling Thread.********************************
 //Purpose : Periodically poll sensor data as per requirements
 //Notes   : Temperature and pressure have different polling intervals 
-//********************************************************************************
+//******************************************************************************
 void* PollingThread(void *arg)
 {
     (void)arg;
@@ -117,11 +134,12 @@ void* PollingThread(void *arg)
         uint64_t ullCurrentTime = GetTimeMs();
         static bool ucReadStatus = true;
         volatile int32_t lReadValue = ZERO;
+
         for (int i = ZERO; i < (int)POLL_TABLE_SIZE; i++)
         {
             PollingConfig_t *Configuration = &gPollingTable[i];
 
-            /****************************************Poll Once****************************************/
+            /*************************** Poll Once*****************************/
 
             if((ullCurrentTime - Configuration->m_ullLastPollTime) >= Configuration->m_ullPollIntervalMs)
             {
@@ -135,6 +153,7 @@ void* PollingThread(void *arg)
                     Read_Data_Status_t eDataStatus;
                     PolledSensorData.m_eType = Configuration->m_eType;
                     PolledSensorData.m_eParam = Configuration->m_eParam;
+
                     if(Configuration->m_eType == PARAM_TYPE_STRING)
                     {
                         Configuration->m_ReadFn.pfnReadstr(PolledSensorData.m_Value.cStringValue);
@@ -171,12 +190,16 @@ void* PollingThread(void *arg)
                     {
                         printf("Memory Allocation failed for polling data\n");
                     }
+                    else
+                    {
+                        /* Nothing to do */
+                    }
                     Configuration->m_ulPolledOnce = 1;
                     Configuration->m_ullLastPollTime = ullCurrentTime;
                     continue;
                 }
 
-            /****************************************Periodic Poll****************************************************/
+            /*************************** Periodic Poll*************************/
 
                 else
                 {
@@ -184,9 +207,11 @@ void* PollingThread(void *arg)
                     Read_Data_Status_t eDataStatus;
                     PolledSensorData.m_eType = Configuration->m_eType;
                     PolledSensorData.m_eParam = Configuration->m_eParam;
+
                     if(Configuration->m_eType == PARAM_TYPE_INT)
                     {
                         lReadValue = Configuration->m_ReadFn.pfnReadInt(&ucReadStatus);
+
                         if(ucReadStatus == false)
                         {
                             if(PolledSensorData.m_eParam == PARAM_TEMP)
@@ -207,6 +232,7 @@ void* PollingThread(void *arg)
                             PolledSensorData.m_Value.lIntValue = lReadValue;
                         }
                         eDataStatus = Sensor_PolledValue_Set(Configuration->m_eParam,&PolledSensorData);
+
                         if(eDataStatus == DATA_ERROR)
                         {
                             printf("Invalid Parameter or Read error\n");

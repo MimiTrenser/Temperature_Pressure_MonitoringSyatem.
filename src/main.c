@@ -1,7 +1,7 @@
-//****************************Temperature Pressure Monitoring System ************************************** 
-//  Copyright (c) 2021 Trenser 
-//  All Rights Reserved 
-//***************************************************************************** 
+//****************************Temperature Pressure Monitoring System ***********
+// Copyright (c) 2026 Trenser Technology Solutions (P) Ltd 
+// All Rights Reserved 
+//****************************************************************************** 
 // 
 // File    : main.c 
 // Summary : Main.c file includes thread creation for polling and process
@@ -9,13 +9,8 @@
 // Author  : Mimi C.S
 // Date    : 19/12/2025
 // 
-//***************************************************************************** 
-#include <pthread.h>
-#include <stdio.h>
-#include "../include/database.h"
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
+//****************************************************************************** 
+#include "database.h"
 
 #define SUCCESS 0
 
@@ -24,14 +19,15 @@ int main(void)
     pthread_t pthread1 = {0};
     pthread_t pthread2 = {0};
     int status = SUCCESS;
+    status = pthread_create(&pthread1, NULL, PollingThread, NULL);
 
-    status = pthread_create(&pthread1, NULL, PollingThread, NULL);/* Polling Thread create */
     if(status != SUCCESS)
     {
         printf("Thread Creation Failed\n");
     }
 
-    status = pthread_create(&pthread2, NULL, ProcessingThread, NULL);/* Processing Thread Create */
+    status = pthread_create(&pthread2, NULL, ProcessingThread, NULL);
+
     if(status != SUCCESS)
     {
         printf("Thread Creation Failed\n");

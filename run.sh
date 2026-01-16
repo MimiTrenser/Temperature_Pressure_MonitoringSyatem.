@@ -11,9 +11,5 @@ make
 
 echo "Running Application"
 echo "######################################################################"
-stdbuf -oL ./build/app | while read line
-do
-   echo "$(date '+%y-%m-%d %H:%M:%S')
-$line"
-done
+gdb --args ./build/app
 
