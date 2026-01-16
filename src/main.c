@@ -12,7 +12,7 @@
 //****************************************************************************** 
 #include "database.h"
 
-#define SUCCESS 0
+#define SUCCESS (0)
 
 int main(void)
 {

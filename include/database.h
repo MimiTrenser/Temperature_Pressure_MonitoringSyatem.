@@ -25,7 +25,7 @@
 #include <sys/time.h>
 #include <stdbool.h>
 
-#define STR_LEN 5
+#define STR_LEN (5)
 
 //***************************** Global Types *********************************** 
  

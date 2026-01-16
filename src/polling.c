@@ -15,11 +15,11 @@
 //******************************* Include Files ******************************** 
 #include "database.h"
 
-#define TEMPERATURE_LOWERBOUND -20
-#define TEMPERATURE_UPPERBOUND 100
-#define PRESSURE_LOWERBOUND 0
-#define PRESSURE_UPPERBOUND 10000
-#define ZERO 0
+#define TEMPERATURE_LOWERBOUND   (-20)
+#define TEMPERATURE_UPPERBOUND   (100)
+#define PRESSURE_LOWERBOUND      (0)
+#define PRESSURE_UPPERBOUND      (10000)
+#define ZERO                     (0)
 
 //***************************** Local Types ************************************ 
  
