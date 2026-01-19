@@ -28,7 +28,7 @@ static int32_t *s_plDataBase = NULL;
 //Purpose   : To get the current System Time in Ms
 //Return    : Updated system time in Ms
 //******************************************************************************
-long long getTimeMs() 
+long long getTimeMs()
 {
     struct timeval tv = {0};
 
@@ -43,6 +43,7 @@ long long getTimeMs()
 //            in a thread-safe manner.
 //Inputs    : eId - The unique identifier for the parameter to be updated.
 //            pcstSensorData - Pointer to the constant sensor data structure.
+//Outputs   : Updated sensor data in the database
 //Return    : It will return Data allocation status an enum
 //Notes     : Requires g_mtxDataLock to be initialized before calling.
 //******************************************************************************
@@ -74,10 +75,11 @@ READ_DATA_STATUS_t sensorPolledValueSet(PARAM_ID_t eId, const SENSOR_RESULT_t *p
     return DATA_ALLOCATION_SUCCESS;
 }
 
-//****************************** Sensor_PolledValue_Get ************************
+//************************** Sensor_PolledValue_Get ****************************
 //Purpose : Getting polled values.
 //Inputs  : eId - The unique identifier for the parameter to be updated.
 //          pGetSensorData - Pointer to which Sensordata is updated.
+//Outputs : Get sensor data from the database
 //Return  : Return data allocation status as enum
 //Notes   : Requires g_mtxDataLock to be initialized before calling.
 //******************************************************************************

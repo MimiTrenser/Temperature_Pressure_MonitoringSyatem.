@@ -15,9 +15,9 @@
 //******************************* Include Files ********************************
 #include "database.h"
 
-//***************************** Local Types ************************************ 
- 
-//***************************** Local Constants ******************************** 
+//***************************** Local Types ************************************
+
+//***************************** Local Constants ********************************
 #define PROCESS_INTERVAL_TEMPERATURE        (200)
 #define PROCESS_INTERVAL_PRESSURE           (400)
 #define MINIMUM_THRESHOLD_TEMPERATURE       (-10)
@@ -33,8 +33,26 @@
 
 //***************************** Local Variables ********************************
 
-PROCESS_CONFIG_t gProcessTable[] = {{PARAM_TEMP, PROCESS_INTERVAL_TEMPERATURE, MINIMUM_THRESHOLD_TEMPERATURE, MAXIMUM_THRESHOLD_TEMPERATURE, SAMPLING_TIME_TEMPERATURE, VIOLATION_TIME_TEMPERATURE, LAST_PROCESS_TIME_TEMPERATURE},
-                                   {PARAM_PRESSURE, PROCESS_INTERVAL_PRESSURE, MINIMUM_THRESHOLD_PRESSURE, MAXIMUM_THRESHOLD_PRESSURE, SAMPLING_TIME_PRESSURE, VIOLATION_TIME_PRESSURE, LAST_PROCESS_TIME_PRESSURE}};
+PROCESS_CONFIG_t gProcessTable[] = {
+                                    {
+                                        PARAM_TEMP,
+                                        PROCESS_INTERVAL_TEMPERATURE,
+                                        MINIMUM_THRESHOLD_TEMPERATURE,
+                                        MAXIMUM_THRESHOLD_TEMPERATURE,
+                                        SAMPLING_TIME_TEMPERATURE,
+                                        VIOLATION_TIME_TEMPERATURE,
+                                        LAST_PROCESS_TIME_TEMPERATURE
+                                    },
+                                    {
+                                        PARAM_PRESSURE,
+                                        PROCESS_INTERVAL_PRESSURE,
+                                        MINIMUM_THRESHOLD_PRESSURE,
+                                        MAXIMUM_THRESHOLD_PRESSURE,
+                                        SAMPLING_TIME_PRESSURE,
+                                        VIOLATION_TIME_PRESSURE,
+                                        LAST_PROCESS_TIME_PRESSURE
+                                    }
+                                    };
 
 #define PROCESS_TABLE_SIZE (sizeof(gProcessTable) / sizeof(PROCESS_CONFIG_t))
 
@@ -44,7 +62,7 @@ static void sendNotificationPressure(int value);
 static void processTemperatureAction(int32_t value);
 static void processPressureAction(int32_t value);
 
-//**************************** sendNotificationTemperature *********************
+//************************** sendNotificationTemperature ***********************
 //Purpose : Print function to indicate Temperature violated threshold value
 //Inputs  : int value - Violated Temperature Value.
 //Outputs : Log temperature violation
@@ -56,7 +74,7 @@ static void sendNotificationTemperature(int value)
     printf("Temperature: %d -> Temperature Violated Threshold Values\n", value);
 }
 
-//****************************** SendNotificationPressure **********************
+//************************** SendNotificationPressure **************************
 //Purpose : Print function to indicate Pressure violated threshold value
 //Inputs  : int value - Violated Pressure Value.
 //Outputs : Log pressure violation
@@ -68,11 +86,12 @@ static void sendNotificationPressure(int value)
     printf("Pressure: %d -> Pressure Violated Threshold Values\n", value);
 }
 
-//****************************** ProcessTemperatureAction **********************
+//************************ ProcessTemperatureAction ****************************
 //Purpose : Print Temperature value
 //Inputs  : int32_t value - Temperature Value.
 //Outputs : Log Temperature
 //Return  : Void return
+//Notes   : None
 //******************************************************************************
 static void processTemperatureAction(int32_t value)
 {
@@ -80,22 +99,25 @@ static void processTemperatureAction(int32_t value)
     printf("Temperature: %d\n", value);
 }
 
-//****************************** ProcessPressureAction *************************
+//************************** ProcessPressureAction *****************************
 //Purpose : Print  Pressure value
 //Inputs  : int32_t value - Pressure Value.
 //Outputs : Log pressure 
 //Return  : Void return
+//Notes   : None
 //******************************************************************************
 static void processPressureAction(int32_t value)
 {
     printf("Pressure: %d\n", value);
 }
 
-//****************************** ProcessingThread ******************************
+//***************************** ProcessingThread *******************************
 //Purpose : Process the sesor data with the requirements
+//Inputs  : None
+//Outputs : Process read data from Temperature and Pressure sensor
+//Return  : None
 //Notes   : It is a Process Thread which periodically process sensor data as per
 //          requirements
-//Return  : Void return
 //******************************************************************************
 void* processingThread(void *arg)
 {

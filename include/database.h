@@ -1,12 +1,12 @@
-//********************** Temparature Pressure Monitoring System ****************
+//******************** Temparature Pressure Monitoring System ******************
 // Copyright (c) 2026 Trenser Technology Solutions (P) Ltd
 // All Rights Reserved
 //******************************************************************************
 //
-// Summary      : The objective is to develop a multi-threaded embedded 
-//                application to monitor environmental parameters 
+// Summary      : The objective is to develop a multi-threaded embedded
+//                application to monitor environmental parameters
 //                (Temperature and Pressure) and system metadata
-//                (Configuration Version). 
+//                (Configuration Version).
 // Note         : None
 //
 //******************************************************************************
@@ -28,11 +28,11 @@
 #define STR_LEN (5)
 
 //***************************** Global Types ***********************************
- 
+
 //***************************** Global Constants *******************************
- 
+
 //***************************** Global Variables *******************************
- 
+
 //***************************** Forward Declarations ***************************
 
 typedef enum
@@ -56,7 +56,7 @@ typedef enum
     PARAM_TYPE_STRING
 } PARAM_TYPE_t;
 
-//******************************** Polling Configuration ***********************
+//*************************** Polling Configuration ****************************
 // Description   : Includes polling Configuration parameters
 //******************************************************************************
 typedef struct
@@ -73,7 +73,7 @@ typedef struct
     uint8_t m_ulPolledOnce;
 } POLLING_CONFIG_t;
 
-//********************************.Process Configuration.***********************
+//***************************.Process Configuration.****************************
 // Description   : Includes Process Configuration parameters
 //******************************************************************************
 typedef struct
@@ -87,7 +87,7 @@ typedef struct
     uint64_t m_ullLastProcessTime;
 } PROCESS_CONFIG_t;
 
-//********************************.Sensor Result.*******************************
+//******************************.Sensor Result.*********************************
 // Description   : Includes members which stores polled results and used for
 //                 processing
 //******************************************************************************

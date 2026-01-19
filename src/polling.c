@@ -1,4 +1,4 @@
-//******************* Temparature Pressure Monitoring System *******************
+//****************** Temparature Pressure Monitoring System ********************
 // Copyright (c) 2026 Trenser Technology Solutions (P) Ltd
 // All Rights Reserved
 //******************************************************************************
@@ -6,13 +6,13 @@
 // File     : Polling.c
 // Summary  : Polling.c file includes execution of Polling Thread, Read
 //            Temperature and Pressure sensors
-// Note     :
+// Note     : None
 // Author   : Mimi C.S
 // Date     : 19/12/2025
 //
 //******************************************************************************
 
-//******************************* Include Files ********************************
+//***************************** Include Files **********************************
 #include "database.h"
 
 //***************************** Local Constants ********************************
@@ -44,9 +44,32 @@
 //            Configversion.
 //Notes     : None
 //******************************************************************************
-POLLING_CONFIG_t gPollingTable[] = {{PARAM_TEMP, POLLING_INTERVAL_TEMPERATURE, PARAM_TYPE_INT, .m_READFN.pfnReadInt = readTemperature, LAST_POLLTIME_TEMPERATURE, POLLED_ONCE_TEMPERATURE},
-                                    {PARAM_PRESSURE, POLLING_INTERVAL_PRESSURE, PARAM_TYPE_INT, .m_READFN.pfnReadInt = readPressure, LAST_POLLTIME_PRESSURE, POLLED_ONCE_PRESSURE},
-                                    {PARAM_CONFIG_VERSION, POLLING_INTERVAL_CONFIG_VERSION, PARAM_TYPE_STRING, .m_READFN.pfnReadstr = readConfigVersion, LAST_POLLTIME_CONFIG_VERSION, POLLED_ONCE_CONFIG_VERSION}};
+POLLING_CONFIG_t gPollingTable[] = {
+                                        {
+                                            PARAM_TEMP,
+                                            POLLING_INTERVAL_TEMPERATURE,
+                                            PARAM_TYPE_INT,
+                                            .m_READFN.pfnReadInt = readTemperature,
+                                            LAST_POLLTIME_TEMPERATURE,
+                                            POLLED_ONCE_TEMPERATURE
+                                        },
+                                        {
+                                            PARAM_PRESSURE,
+                                            POLLING_INTERVAL_PRESSURE,
+                                            PARAM_TYPE_INT,
+                                            .m_READFN.pfnReadInt = readPressure,
+                                            LAST_POLLTIME_PRESSURE,
+                                            POLLED_ONCE_PRESSURE
+                                        },
+                                        {
+                                            PARAM_CONFIG_VERSION,
+                                            POLLING_INTERVAL_CONFIG_VERSION,
+                                            PARAM_TYPE_STRING,
+                                            .m_READFN.pfnReadstr = readConfigVersion,
+                                            LAST_POLLTIME_CONFIG_VERSION,
+                                            POLLED_ONCE_CONFIG_VERSION
+                                        }
+                                    };
 
 #define POLL_TABLE_SIZE (sizeof(gPollingTable) / sizeof(POLLING_CONFIG_t))
 
@@ -57,9 +80,10 @@ POLLING_CONFIG_t gPollingTable[] = {{PARAM_TEMP, POLLING_INTERVAL_TEMPERATURE, P
 //            bounds.
 //Inputs    : pblReadStatus - Pointer to a boolean to store the success/failure
 //            status.
+//Outputs   : Read Temperature value and validate the value
 //Return    : The generated temperature value (-20 to 120).
 //Notes     : Simulated via rand(); depends on TemperatureLowerBound and 
-//            TemperatureUpperBound 
+//            TemperatureUpperBound
 //******************************************************************************
 int32_t readTemperature(bool *pblReadStatus)
 {
@@ -70,8 +94,8 @@ int32_t readTemperature(bool *pblReadStatus)
 
     static int32_t slTemperature = 0;
 
-    /* Genereate random values from 0 to 120 */ 
-    slTemperature = (TEMPERATURE_LOWERBOUND + rand() % RAND_RANGE_TEMPERATURE); 
+    /* Genereate random values from 0 to 120 */
+    slTemperature = (TEMPERATURE_LOWERBOUND + rand() % RAND_RANGE_TEMPERATURE);
 
     if(slTemperature < TEMPERATURE_LOWERBOUND ||
         slTemperature > TEMPERATURE_UPPERBOUND)
@@ -84,14 +108,15 @@ int32_t readTemperature(bool *pblReadStatus)
     }
     return slTemperature;
 }
- 
-//****************************** sReadPressure ********************************* 
-//Purpose : Generates a simulated pressure reading and validates it against 
+
+//****************************** sReadPressure *********************************
+//Purpose : Generates a simulated pressure reading and validates it against
 //          bounds.
-//Inputs  : pblReadStatus - Pointer to a boolean to store the success/failure 
+//Inputs  : pblReadStatus - Pointer to a boolean to store the success/failure
 //          status.
+//Outputs : Read Pressure value and validate the value 
 //Return  : The generated pressure value (0 to 11000).
-//Notes   : Simulated via rand(); depends on PressureLowerBound and 
+//Notes   : Simulated via rand(); depends on PressureLowerBound and
 //          PressureUpperBound
 //******************************************************************************
 int32_t readPressure(bool *pblReadStatus)
@@ -104,7 +129,7 @@ int32_t readPressure(bool *pblReadStatus)
     static int32_t sPressure = 0;
 
     /* Generate Random values from 0 to 11000 */
-    sPressure = (rand() % RAND_RANGE_PRESSURE); 
+    sPressure = (rand() % RAND_RANGE_PRESSURE);
                                            
     if(sPressure < PRESSURE_LOWERBOUND || sPressure > PRESSURE_UPPERBOUND)
     {
@@ -121,7 +146,8 @@ int32_t readPressure(bool *pblReadStatus)
 //****************************** sReadConfigVersion ****************************
 //Purpose   : To read configuration version one time
 //Inputs    : pBuffer : Pointer buffer which stores the Configuration Version
-//Return    : Void return
+//Outputs   : Read Configuration version
+//Return    : None
 //Notes     : Configuration version read only once
 //******************************************************************************
 void readConfigVersion(char *pBuffer)
@@ -140,7 +166,10 @@ void readConfigVersion(char *pBuffer)
 
 //******************************.Polling Thread.********************************
 //Purpose : Periodically poll sensor data as per requirements
-//Notes   : Temperature and pressure have different polling intervals 
+//Inputs  : None 
+//Outputs : Periodic eading of temperature and pressure sensor
+//Return  : None
+//Notes   : Temperature and pressure have different polling intervals
 //******************************************************************************
 void* pollingThread(void *arg)
 {
