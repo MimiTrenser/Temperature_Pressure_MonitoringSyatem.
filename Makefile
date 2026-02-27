@@ -1,6 +1,6 @@
 # Compiler and flags
 CC       := gcc
-CFLAGS   := -Wall -Wextra -Wpedantic -std=c11 -O2 -Iinclude -MMD -MP
+CFLAGS   := -Wall -Wextra -Wpedantic -std=c11 -O0 -g -fstack-usage -pthread -Iinclude -MMD -MP
 LDFLAGS  :=
 
 # Project structure

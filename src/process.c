@@ -1,94 +1,197 @@
-#include "sensor.h"
-#include <stdio.h>
-#include <unistd.h>
-#include <pthread.h>
+//******************** Temparature Pressure Monitoring System ******************
+// Copyright (c) 2026 Trenser Technology Solutions (P) Ltd
+// All Rights Reserved
+//******************************************************************************
+//
+// File    : process.c
+// Summary : Process.c file executes Process Thread.Process the Temperarture and
+//           pressure values as per requirement
+// Note    : None
+// Author  : Mimi C.S
+// Date    : 19/12/2025
+//
+//******************************************************************************
 
-static void sendNotification_Temp(int value)
+//******************************* Include Files ********************************
+#include "database.h"
+
+//***************************** Local Types ************************************
+
+//***************************** Local Constants ********************************
+#define PROCESS_INTERVAL_TEMPERATURE        (200)
+#define PROCESS_INTERVAL_PRESSURE           (400)
+#define MINIMUM_THRESHOLD_TEMPERATURE       (-10)
+#define MINIMUM_THRESHOLD_PRESSURE          (500)
+#define MAXIMUM_THRESHOLD_TEMPERATURE       (70)
+#define MAXIMUM_THRESHOLD_PRESSURE          (6000)
+#define SAMPLING_TIME_TEMPERATURE           (400)
+#define SAMPLING_TIME_PRESSURE              (800)
+#define VIOLATION_TIME_TEMPERATURE          (0)
+#define VIOLATION_TIME_PRESSURE             (0)
+#define LAST_PROCESS_TIME_TEMPERATURE       (0)
+#define LAST_PROCESS_TIME_PRESSURE          (0)
+
+//***************************** Local Variables ********************************
+
+PROCESS_CONFIG_t gProcessTable[] = {
+                                    {
+                                        PARAM_TEMP,
+                                        PROCESS_INTERVAL_TEMPERATURE,
+                                        MINIMUM_THRESHOLD_TEMPERATURE,
+                                        MAXIMUM_THRESHOLD_TEMPERATURE,
+                                        SAMPLING_TIME_TEMPERATURE,
+                                        VIOLATION_TIME_TEMPERATURE,
+                                        LAST_PROCESS_TIME_TEMPERATURE
+                                    },
+                                    {
+                                        PARAM_PRESSURE,
+                                        PROCESS_INTERVAL_PRESSURE,
+                                        MINIMUM_THRESHOLD_PRESSURE,
+                                        MAXIMUM_THRESHOLD_PRESSURE,
+                                        SAMPLING_TIME_PRESSURE,
+                                        VIOLATION_TIME_PRESSURE,
+                                        LAST_PROCESS_TIME_PRESSURE
+                                    }
+                                    };
+
+#define PROCESS_TABLE_SIZE (sizeof(gProcessTable) / sizeof(PROCESS_CONFIG_t))
+
+//**************************** Local Functions *********************************
+static void sendNotificationTemperature(int value);
+static void sendNotificationPressure(int value);
+static void processTemperatureAction(int32_t value);
+static void processPressureAction(int32_t value);
+
+//************************** sendNotificationTemperature ***********************
+//Purpose : Print function to indicate Temperature violated threshold value
+//Inputs  : int value - Violated Temperature Value.
+//Outputs : Log temperature violation
+//Return  : Void return
+//Notes   : Threshold for temperarture is -10 to 20
+//******************************************************************************
+static void sendNotificationTemperature(int value)
 {
-    printf("Temperature : %d -> Temperature Violated Threshold Values\n",value);
+    printf("Temperature: %d -> Temperature Violated Threshold Values\n", value);
 }
 
-static void sendNotification_Pressure(int value)
+//************************** SendNotificationPressure **************************
+//Purpose : Print function to indicate Pressure violated threshold value
+//Inputs  : int value - Violated Pressure Value.
+//Outputs : Log pressure violation
+//Return  : Void return
+//Notes   : Threshold for pressure is 400 to 6000
+//******************************************************************************
+static void sendNotificationPressure(int value)
 {
-    printf("Pressure : %d -> Pressure Violated Threshold Values\n",value);
+    printf("Pressure: %d -> Pressure Violated Threshold Values\n", value);
 }
 
-static void processTempAction(int32_t value)
+//************************ ProcessTemperatureAction ****************************
+//Purpose : Print Temperature value
+//Inputs  : int32_t value - Temperature Value.
+//Outputs : Log Temperature
+//Return  : Void return
+//Notes   : None
+//******************************************************************************
+static void processTemperatureAction(int32_t value)
 {
 
     printf("Temperature: %d\n", value);
 }
 
+//************************** ProcessPressureAction *****************************
+//Purpose : Print  Pressure value
+//Inputs  : int32_t value - Pressure Value.
+//Outputs : Log pressure 
+//Return  : Void return
+//Notes   : None
+//******************************************************************************
 static void processPressureAction(int32_t value)
 {
     printf("Pressure: %d\n", value);
 }
 
-
-ProcessConfig_t process_table[] = {{PARAM_TEMP,200,-10,70,400,0,0},
-                                    {PARAM_PRESSURE,400,500,6000,800,0,0}};
-
-#define SizeofProcessTable (sizeof(process_table)/sizeof(ProcessConfig_t))
-
-void* ProcessingThread(void *arg)
+//***************************** ProcessingThread *******************************
+//Purpose : Process the sesor data with the requirements
+//Inputs  : None
+//Outputs : Process read data from Temperature and Pressure sensor
+//Return  : None
+//Notes   : It is a Process Thread which periodically process sensor data as per
+//          requirements
+//******************************************************************************
+void* processingThread(void *arg)
 {
     (void)arg;
 
     while (1)
     {
-        int64_t now = getTimeMs();
-        for(int i = 0;i < (int)SizeofProcessTable ;i++)
+        for (int i = 0; i < (int)PROCESS_TABLE_SIZE; i++)
         {
-            SensorResult data;
-            ProcessConfig_t *config = &process_table[i];
-            if((now - config->lastProcessTime) >= (config->processInterval_ms))
+            int64_t llCurrentTime = getTimeMs();
+            SENSOR_RESULT_t ProcessSensorData = {0};
+            READ_DATA_STATUS_t eDataStatus;
+            PROCESS_CONFIG_t *Configuration = &gProcessTable[i];
+            ProcessSensorData.m_eParam = Configuration->m_eParam;
+
+            if((llCurrentTime - Configuration->m_ullLastProcessTime) >= (Configuration->m_ullProcessIntervalMs))
             {
-                GetPolledValue(config->Param,&data);
-                if(data.Read_Status == 1)
+                eDataStatus = sensorPolledValueGet(Configuration->m_eParam, &ProcessSensorData);
+                if(eDataStatus == DATA_ERROR)
                 {
-                    if(config->Param == PARAM_TEMP)
-                    {
-                        printf("Temperature value is not within required range\n");
-                    }
-                    if(config->Param == PARAM_PRESSURE)
-                    {
-                        printf("Pressure value is not within required range\n");
-                    }
-                }
-                if(data.value.int_val < config->mini_threshold || data.value.int_val > config->max_threshold)
-                {
-                    config->violationtime += config->processInterval_ms;
+                    printf("Invalid Parameter Type or Data is not present\n");
                 }
                 else
                 {
-                    if(config->Param == PARAM_TEMP)
+                if(ProcessSensorData.m_VALUE.lIntValue < Configuration->m_lMiniThreshold ||
+                   ProcessSensorData.m_VALUE.lIntValue > Configuration->m_llMaxThreshold)
+                {
+                    /* Violation time increments by ProcessIntervalMs in each violation*/
+                    Configuration->m_ulViolationTime += Configuration->m_ullProcessIntervalMs;
+                }
+                else
+                {
+                    if(ProcessSensorData.m_eParam == PARAM_TEMP)
                     {
-                        processTempAction(data.value.int_val);
+                        processTemperatureAction(ProcessSensorData.m_VALUE.lIntValue);
                     }
-                    if(config->Param == PARAM_PRESSURE)
+                    else if(ProcessSensorData.m_eParam == PARAM_PRESSURE)
                     {
-                        processPressureAction(data.value.int_val);
+                        processPressureAction(ProcessSensorData.m_VALUE.lIntValue);
                     }
-                    config->lastProcessTime = now;
-                    config->violationtime = 0;
+                    else
+                    {
+                        printf("Invalid Parameter Type or Data is not present\n");
+                    }
+                    Configuration->m_ulViolationTime = 0;
 
                 }
-                if(config->violationtime >= config->samplingtime)
+                /*If violation time exceeds sampling time Notification sent*/
+                if(Configuration->m_ulViolationTime >= Configuration->m_ulSamplingTime)
                 {
-                    if(config->Param == PARAM_TEMP)
+                    if(ProcessSensorData.m_eParam == PARAM_TEMP)
                     {
-                        sendNotification_Temp(data.value.int_val);
+                        sendNotificationTemperature(ProcessSensorData.m_VALUE.lIntValue);
                     }
-                    if(config->Param == PARAM_PRESSURE)
+                    else if(ProcessSensorData.m_eParam == PARAM_PRESSURE)
                     {
-                        sendNotification_Pressure(data.value.int_val);
+                        sendNotificationPressure(ProcessSensorData.m_VALUE.lIntValue);
                     }
-                    config->lastProcessTime = now;
-                    config->violationtime = 0;
+                    else
+                    {
+                        printf("Invalid Parameter Type or Data is not present\n");
+                    }
+                    Configuration->m_ulViolationTime = 0;
                 }
+                Configuration->m_ullLastProcessTime = llCurrentTime;
+            }
+            }
+            else
+            {
+                /* Nothing to do */
             }
         }
-        usleep(50000);//50ms
+        usleep(50000);/*50Ms*/
     }
+
     return NULL;
 }
